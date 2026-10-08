@@ -1,0 +1,72 @@
+name: Compiler Karakeep FR
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version de Karakeep à compiler (tag GitHub)"
+        required: true
+        default: "v0.33.2"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Récupérer ce dépôt (patch de traduction)
+        uses: actions/checkout@v4
+        with:
+          path: fr
+
+      - name: Récupérer le code officiel de Karakeep
+        uses: actions/checkout@v4
+        with:
+          repository: karakeep-app/karakeep
+          ref: ${{ inputs.version }}
+          path: karakeep
+
+      - name: Appliquer la traduction française
+        working-directory: karakeep
+        run: git apply --whitespace=nowarn ../fr/karakeep-fr.patch
+
+      - name: Installer Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: temurin
+
+      - name: Installer le SDK Android
+        uses: android-actions/setup-android@v3
+
+      - name: Installer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Installer les dépendances
+        working-directory: karakeep
+        run: |
+          corepack enable
+          pnpm install --filter "@karakeep/mobile..."
+
+      - name: Générer le projet Android
+        working-directory: karakeep/apps/mobile
+        run: npx expo prebuild --platform android --no-install
+        env:
+          SENTRY_DISABLE_AUTO_UPLOAD: "true"
+
+      - name: Compiler l'APK
+        working-directory: karakeep/apps/mobile/android
+        run: ./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a --no-daemon
+        env:
+          SENTRY_DISABLE_AUTO_UPLOAD: "true"
+          NODE_ENV: production
+
+      - name: Renommer l'APK
+        run: cp karakeep/apps/mobile/android/app/build/outputs/apk/release/app-release.apk "Karakeep-FR-${{ inputs.version }}.apk"
+
+      - name: Mettre l'APK à disposition
+        uses: actions/upload-artifact@v4
+        with:
+          name: Karakeep-FR-${{ inputs.version }}
+          path: Karakeep-FR-${{ inputs.version }}.apk
