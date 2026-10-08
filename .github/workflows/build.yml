@@ -34,10 +34,7 @@ jobs:
         with:
           java-version: "17"
           distribution: temurin
-
-      - name: Installer le SDK Android
-        uses: android-actions/setup-android@v3
-
+          
       - name: Installer Node.js
         uses: actions/setup-node@v4
         with:
