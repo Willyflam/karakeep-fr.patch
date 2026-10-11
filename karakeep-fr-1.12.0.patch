@@ -1,0 +1,3903 @@
+diff --git a/apps/mobile/app.config.js b/apps/mobile/app.config.js
+index 1ec09e7..fefb518 100644
+--- a/apps/mobile/app.config.js
++++ b/apps/mobile/app.config.js
+@@ -8,7 +8,7 @@ export default {
+           scheme: "karakeep-dev",
+         }
+       : {
+-          name: "Karakeep",
++          name: "Karakeep FR",
+           scheme: "karakeep",
+         }),
+     slug: "hoarder",
+@@ -67,7 +67,7 @@ export default {
+       },
+       package: IS_DEV
+         ? "app.hoarder.hoardermobile.dev"
+-        : "app.hoarder.hoardermobile",
++        : "app.hoarder.hoardermobile.fr",
+       versionCode: 49,
+     },
+     plugins: [
+@@ -95,7 +95,7 @@ export default {
+         "expo-image-picker",
+         {
+           photosPermission:
+-            "The app access your photo gallary on your request to hoard them.",
++            "Karakeep accède à votre galerie photos à votre demande pour enregistrer des images.",
+         },
+       ],
+       [
+diff --git a/apps/mobile/app/_layout.tsx b/apps/mobile/app/_layout.tsx
+index be9224c..1ba4145 100644
+--- a/apps/mobile/app/_layout.tsx
++++ b/apps/mobile/app/_layout.tsx
+@@ -98,7 +98,7 @@ export default Sentry.wrap(function RootLayout() {
+               options={{
+                 headerShown: true,
+                 headerBackVisible: true,
+-                headerBackTitle: "Back",
++                headerBackTitle: "Retour",
+                 title: "",
+               }}
+             />
+@@ -118,7 +118,7 @@ export default Sentry.wrap(function RootLayout() {
+               name="server-address"
+               options={{
+                 ...formSheetSurfaceOptions,
+-                title: "Server Address",
++                title: "Adresse du serveur",
+                 headerShown: true,
+                 headerTransparent: false,
+                 headerLargeTitle: false,
+@@ -132,7 +132,7 @@ export default Sentry.wrap(function RootLayout() {
+               name="test-connection"
+               options={{
+                 ...formSheetSurfaceOptions,
+-                title: "Test Connection",
++                title: "Tester la connexion",
+                 headerShown: true,
+                 headerTransparent: false,
+                 headerLargeTitle: false,
+diff --git a/apps/mobile/app/dashboard/(tabs)/(highlights)/_layout.tsx b/apps/mobile/app/dashboard/(tabs)/(highlights)/_layout.tsx
+index 29e4571..467a6ce 100644
+--- a/apps/mobile/app/dashboard/(tabs)/(highlights)/_layout.tsx
++++ b/apps/mobile/app/dashboard/(tabs)/(highlights)/_layout.tsx
+@@ -4,7 +4,7 @@ import { tabScreenOptions } from "@/lib/tabScreenOptions";
+ export default function Layout() {
+   return (
+     <Stack screenOptions={tabScreenOptions}>
+-      <Stack.Screen name="index" options={{ title: "Highlights" }} />
++      <Stack.Screen name="index" options={{ title: "Surlignages" }} />
+     </Stack>
+   );
+ }
+diff --git a/apps/mobile/app/dashboard/(tabs)/(home)/_layout.tsx b/apps/mobile/app/dashboard/(tabs)/(home)/_layout.tsx
+index 18fa50a..21f5dee 100644
+--- a/apps/mobile/app/dashboard/(tabs)/(home)/_layout.tsx
++++ b/apps/mobile/app/dashboard/(tabs)/(home)/_layout.tsx
+@@ -20,7 +20,7 @@ export default function Layout() {
+         }),
+       }}
+     >
+-      <Stack.Screen name="index" options={{ title: "Home" }} />
++      <Stack.Screen name="index" options={{ title: "Accueil" }} />
+     </Stack>
+   );
+ }
+diff --git a/apps/mobile/app/dashboard/(tabs)/(home)/index.tsx b/apps/mobile/app/dashboard/(tabs)/(home)/index.tsx
+index cc4231d..a8900b6 100644
+--- a/apps/mobile/app/dashboard/(tabs)/(home)/index.tsx
++++ b/apps/mobile/app/dashboard/(tabs)/(home)/index.tsx
+@@ -28,7 +28,7 @@ function useNewBookmarkActions(openNewBookmarkModal: () => void) {
+   const { uploadAsset } = useUploadAsset(settings, {
+     onSuccess: () => {
+       if (uploadToastIdRef.current !== null) {
+-        sonnerToast.success("Image saved!", { id: uploadToastIdRef.current });
++        sonnerToast.success("Image enregistrée !", { id: uploadToastIdRef.current });
+         uploadToastIdRef.current = null;
+       }
+     },
+@@ -53,7 +53,7 @@ function useNewBookmarkActions(openNewBookmarkModal: () => void) {
+     } else if (nativeEvent.event === "library") {
+       try {
+         uploadToastIdRef.current = sonnerToast.loading(
+-          "Opening photo library...",
++          "Ouverture de la photothèque...",
+         );
+         const result = await ImagePicker.launchImageLibraryAsync({
+           mediaTypes: ["images"],
+@@ -67,7 +67,7 @@ function useNewBookmarkActions(openNewBookmarkModal: () => void) {
+             uploadToastIdRef.current = null;
+             return;
+           }
+-          sonnerToast.loading("Uploading image...", {
++          sonnerToast.loading("Envoi de l’image...", {
+             id: uploadToastIdRef.current,
+           });
+           uploadAsset({
+@@ -81,22 +81,22 @@ function useNewBookmarkActions(openNewBookmarkModal: () => void) {
+         }
+       } catch {
+         if (uploadToastIdRef.current !== null) {
+-          sonnerToast.error("Failed to open photo library", {
++          sonnerToast.error("Impossible d’ouvrir la photothèque", {
+             id: uploadToastIdRef.current,
+           });
+           uploadToastIdRef.current = null;
+         } else {
+-          sonnerToast.error("Failed to open photo library");
++          sonnerToast.error("Impossible d’ouvrir la photothèque");
+         }
+       }
+     } else if (nativeEvent.event === "clipboard") {
+       if (createBookmark.isPending) return;
+ 
+-      const toastId = sonnerToast.loading("Reading clipboard...");
++      const toastId = sonnerToast.loading("Lecture du presse-papiers...");
+       try {
+         const contents = (await Clipboard.getStringAsync()).trim();
+         if (!contents) {
+-          sonnerToast.error("Clipboard is empty", { id: toastId });
++          sonnerToast.error("Le presse-papiers est vide", { id: toastId });
+           return;
+         }
+ 
+@@ -105,11 +105,11 @@ function useNewBookmarkActions(openNewBookmarkModal: () => void) {
+           const parsed = new URL(contents);
+           if (parsed.protocol === "http:" || parsed.protocol === "https:") {
+             isUrl = true;
+-            sonnerToast.loading("Saving URL...", { id: toastId });
++            sonnerToast.loading("Enregistrement de l’URL...", { id: toastId });
+           }
+         } catch {
+           // not a valid URL — treat as text
+-          sonnerToast.loading("Saving text...", { id: toastId });
++          sonnerToast.loading("Enregistrement du texte...", { id: toastId });
+         }
+ 
+         const resp = await (isUrl
+@@ -123,12 +123,12 @@ function useNewBookmarkActions(openNewBookmarkModal: () => void) {
+               text: contents,
+               source: "mobile",
+             }));
+-        sonnerToast.success(resp.alreadyExists ? "Already exists" : "Saved!", {
++        sonnerToast.success(resp.alreadyExists ? "Existe déjà" : "Enregistré !", {
+           id: toastId,
+         });
+       } catch (e) {
+         sonnerToast.error(
+-          e instanceof Error ? e.message : "Failed to save from clipboard",
++          e instanceof Error ? e.message : "Échec de l’enregistrement depuis le presse-papiers",
+           { id: toastId },
+         );
+       }
+@@ -138,19 +138,19 @@ function useNewBookmarkActions(openNewBookmarkModal: () => void) {
+   const actions = [
+     {
+       id: "clipboard",
+-      title: "Clipboard",
++      title: "Presse-papiers",
+       image: Platform.select({ ios: "clipboard" }),
+       imageColor: Platform.select({ ios: menuIconColor }),
+     },
+     {
+       id: "new",
+-      title: "New Bookmark",
++      title: "Nouveau marque-page",
+       image: Platform.select({ ios: "square.and.pencil" }),
+       imageColor: Platform.select({ ios: menuIconColor }),
+     },
+     {
+       id: "library",
+-      title: "Photo Library",
++      title: "Photothèque",
+       image: Platform.select({ ios: "photo" }),
+       imageColor: Platform.select({ ios: menuIconColor }),
+     },
+@@ -173,7 +173,7 @@ export default function Home() {
+     <>
+       {Platform.OS === "android" && (
+         <AndroidSearchBar
+-          label="Search bookmarks..."
++          label="Rechercher des marque-pages..."
+           onPress={() => setSearchActive(true)}
+           rightElement={<ProfileAvatarButton />}
+           trailingElement={<BookmarkListHeader />}
+diff --git a/apps/mobile/app/dashboard/(tabs)/(lists)/_layout.tsx b/apps/mobile/app/dashboard/(tabs)/(lists)/_layout.tsx
+index 849ca48..aaeea0d 100644
+--- a/apps/mobile/app/dashboard/(tabs)/(lists)/_layout.tsx
++++ b/apps/mobile/app/dashboard/(tabs)/(lists)/_layout.tsx
+@@ -4,7 +4,7 @@ import { tabScreenOptions } from "@/lib/tabScreenOptions";
+ export default function Layout() {
+   return (
+     <Stack screenOptions={tabScreenOptions}>
+-      <Stack.Screen name="index" options={{ title: "Lists" }} />
++      <Stack.Screen name="index" options={{ title: "Listes" }} />
+     </Stack>
+   );
+ }
+diff --git a/apps/mobile/app/dashboard/(tabs)/(lists)/index.tsx b/apps/mobile/app/dashboard/(tabs)/(lists)/index.tsx
+index 0af3583..173b717 100644
+--- a/apps/mobile/app/dashboard/(tabs)/(lists)/index.tsx
++++ b/apps/mobile/app/dashboard/(tabs)/(lists)/index.tsx
+@@ -121,7 +121,7 @@ export default function Lists() {
+     {
+       id: "fav",
+       logo: "⭐️",
+-      name: "Favourites",
++      name: "Favoris",
+       href: "/dashboard/favourites",
+       level: 0,
+       numChildren: 0,
+@@ -130,7 +130,7 @@ export default function Lists() {
+     {
+       id: "arch",
+       logo: "🗄️",
+-      name: "Archive",
++      name: "Archives",
+       href: "/dashboard/archive",
+       level: 0,
+       numChildren: 0,
+@@ -148,7 +148,7 @@ export default function Lists() {
+     links.push({
+       id: "shared-section",
+       logo: "👥",
+-      name: "Shared Lists",
++      name: "Listes partagées",
+       href: "#",
+       level: 0,
+       numChildren: sharedListsCount,
+diff --git a/apps/mobile/app/dashboard/(tabs)/(search)/_layout.tsx b/apps/mobile/app/dashboard/(tabs)/(search)/_layout.tsx
+index 5aeff03..9e6ce33 100644
+--- a/apps/mobile/app/dashboard/(tabs)/(search)/_layout.tsx
++++ b/apps/mobile/app/dashboard/(tabs)/(search)/_layout.tsx
+@@ -4,7 +4,7 @@ import { tabScreenOptions } from "@/lib/tabScreenOptions";
+ export default function Layout() {
+   return (
+     <Stack screenOptions={tabScreenOptions}>
+-      <Stack.Screen name="index" options={{ title: "Search" }} />
++      <Stack.Screen name="index" options={{ title: "Recherche" }} />
+     </Stack>
+   );
+ }
+diff --git a/apps/mobile/app/dashboard/(tabs)/(tags)/index.tsx b/apps/mobile/app/dashboard/(tabs)/(tags)/index.tsx
+index 4adba8e..8db938e 100644
+--- a/apps/mobile/app/dashboard/(tabs)/(tags)/index.tsx
++++ b/apps/mobile/app/dashboard/(tabs)/(tags)/index.tsx
+@@ -87,7 +87,7 @@ export default function Tags() {
+         ListHeaderComponent={
+           <SearchInput
+             containerClassName="mx-2 mb-2"
+-            placeholder="Search tags..."
++            placeholder="Rechercher des tags..."
+             value={searchQuery}
+             onChangeText={setSearchQuery}
+           />
+@@ -141,15 +141,15 @@ export default function Tags() {
+           !isPending ? (
+             <EmptyState
+               icon={Tag}
+-              title="No Tags"
+-              subtitle="Tags will appear as you organize your bookmarks"
++              title="Aucun tag"
++              subtitle="Les tags apparaîtront à mesure que vous organisez vos marque-pages"
+             />
+           ) : null
+         }
+       />
+       <FAB>
+         <Pressable
+-          accessibilityLabel="Create tag"
++          accessibilityLabel="Créer un tag"
+           accessibilityRole="button"
+           className="h-full w-full items-center justify-center"
+           onPress={() => {
+diff --git a/apps/mobile/app/dashboard/(tabs)/_layout.tsx b/apps/mobile/app/dashboard/(tabs)/_layout.tsx
+index d8ef401..60c26e1 100644
+--- a/apps/mobile/app/dashboard/(tabs)/_layout.tsx
++++ b/apps/mobile/app/dashboard/(tabs)/_layout.tsx
+@@ -26,7 +26,7 @@ export default function TabLayout() {
+             />
+           }
+         />
+-        <NativeTabs.Trigger.Label>Home</NativeTabs.Trigger.Label>
++        <NativeTabs.Trigger.Label>Accueil</NativeTabs.Trigger.Label>
+       </NativeTabs.Trigger>
+ 
+       <NativeTabs.Trigger name="(lists)">
+@@ -39,7 +39,7 @@ export default function TabLayout() {
+             />
+           }
+         />
+-        <NativeTabs.Trigger.Label>Lists</NativeTabs.Trigger.Label>
++        <NativeTabs.Trigger.Label>Listes</NativeTabs.Trigger.Label>
+       </NativeTabs.Trigger>
+ 
+       <NativeTabs.Trigger name="(tags)">
+@@ -65,7 +65,7 @@ export default function TabLayout() {
+             />
+           }
+         />
+-        <NativeTabs.Trigger.Label>Highlights</NativeTabs.Trigger.Label>
++        <NativeTabs.Trigger.Label>Surlignages</NativeTabs.Trigger.Label>
+       </NativeTabs.Trigger>
+ 
+       <NativeTabs.Trigger
+@@ -82,7 +82,7 @@ export default function TabLayout() {
+             />
+           }
+         />
+-        <NativeTabs.Trigger.Label>Search</NativeTabs.Trigger.Label>
++        <NativeTabs.Trigger.Label>Recherche</NativeTabs.Trigger.Label>
+       </NativeTabs.Trigger>
+     </NativeTabs>
+   );
+diff --git a/apps/mobile/app/dashboard/_layout.tsx b/apps/mobile/app/dashboard/_layout.tsx
+index bc99ba3..21305d9 100644
+--- a/apps/mobile/app/dashboard/_layout.tsx
++++ b/apps/mobile/app/dashboard/_layout.tsx
+@@ -60,13 +60,13 @@ export default function Dashboard() {
+     >
+       <Stack.Screen
+         name="(tabs)"
+-        options={{ headerShown: false, title: "Home" }}
++        options={{ headerShown: false, title: "Accueil" }}
+       />
+       <Stack.Screen
+         name="favourites"
+         options={{
+-          headerTitle: "⭐️ Favourites",
+-          headerBackTitle: "Back",
++          headerTitle: "⭐️ Favoris",
++          headerBackTitle: "Retour",
+           headerRight: () => <BookmarkListHeader />,
+         }}
+       />
+@@ -74,7 +74,7 @@ export default function Dashboard() {
+         name="bookmarks/[slug]/index"
+         options={{
+           headerTitle: "",
+-          headerBackTitle: "Back",
++          headerBackTitle: "Retour",
+           // iOS 27 can leave the automatic back control empty after sign-in.
+           headerBackButtonDisplayMode: "minimal",
+           headerLargeTitle: false,
+@@ -84,8 +84,8 @@ export default function Dashboard() {
+         name="bookmarks/new"
+         options={{
+           ...formSheetSurfaceOptions,
+-          headerTitle: "New Bookmark",
+-          headerBackTitle: "Back",
++          headerTitle: "Nouveau marque-page",
++          headerBackTitle: "Retour",
+           headerTransparent: false,
+           headerLargeTitle: false,
+           presentation: Platform.select({
+@@ -100,7 +100,7 @@ export default function Dashboard() {
+         name="bookmarks/[slug]/manage_tags"
+         options={{
+           ...formSheetSurfaceOptions,
+-          headerTitle: "Manage Tags",
++          headerTitle: "Gérer les tags",
+           headerTransparent: false,
+           headerLargeTitle: false,
+           presentation: Platform.select({
+@@ -115,7 +115,7 @@ export default function Dashboard() {
+         name="bookmarks/[slug]/manage_lists"
+         options={{
+           ...formSheetSurfaceOptions,
+-          headerTitle: "Manage Lists",
++          headerTitle: "Gérer les listes",
+           headerTransparent: false,
+           headerLargeTitle: false,
+           presentation: Platform.select({
+@@ -130,7 +130,7 @@ export default function Dashboard() {
+         name="bookmarks/[slug]/info"
+         options={{
+           ...formSheetSurfaceOptions,
+-          headerTitle: "Edit Bookmark",
++          headerTitle: "Modifier le marque-page",
+           headerTransparent: false,
+           headerLargeTitle: false,
+           presentation: Platform.select({
+@@ -144,7 +144,7 @@ export default function Dashboard() {
+         name="bookmarks/[slug]/highlights"
+         options={{
+           ...formSheetSurfaceOptions,
+-          headerTitle: "Highlights",
++          headerTitle: "Surlignages",
+           headerTransparent: false,
+           headerLargeTitle: false,
+           presentation: Platform.select({
+@@ -158,8 +158,8 @@ export default function Dashboard() {
+         name="lists/new"
+         options={{
+           ...formSheetSurfaceOptions,
+-          headerTitle: "New List",
+-          headerBackTitle: "Back",
++          headerTitle: "Nouvelle liste",
++          headerBackTitle: "Retour",
+           headerLargeTitle: false,
+           headerTransparent: false,
+           presentation: Platform.select({
+@@ -173,8 +173,8 @@ export default function Dashboard() {
+         name="lists/[slug]/edit"
+         options={{
+           ...formSheetSurfaceOptions,
+-          headerTitle: "Edit List",
+-          headerBackTitle: "Back",
++          headerTitle: "Modifier la liste",
++          headerBackTitle: "Retour",
+           headerLargeTitle: false,
+           headerTransparent: false,
+           presentation: Platform.select({
+@@ -188,7 +188,7 @@ export default function Dashboard() {
+         name="lists/[slug]/sharing"
+         options={{
+           ...formSheetSurfaceOptions,
+-          headerTitle: "Sharing & Access",
++          headerTitle: "Partage et accès",
+           headerLargeTitle: false,
+           headerTransparent: false,
+           presentation: Platform.select({
+@@ -201,8 +201,8 @@ export default function Dashboard() {
+       <Stack.Screen
+         name="lists/select-parent"
+         options={{
+-          headerTitle: "Parent List",
+-          headerBackTitle: "Back",
++          headerTitle: "Liste parente",
++          headerBackTitle: "Retour",
+           headerLargeTitle: false,
+           headerTransparent: false,
+         }}
+@@ -211,8 +211,8 @@ export default function Dashboard() {
+         name="tags/new"
+         options={{
+           ...formSheetSurfaceOptions,
+-          headerTitle: "New Tag",
+-          headerBackTitle: "Back",
++          headerTitle: "Nouveau tag",
++          headerBackTitle: "Retour",
+           headerLargeTitle: false,
+           headerTransparent: false,
+           presentation: Platform.select({
+@@ -226,8 +226,8 @@ export default function Dashboard() {
+         name="tags/[slug]/edit"
+         options={{
+           ...formSheetSurfaceOptions,
+-          headerTitle: "Edit Tag",
+-          headerBackTitle: "Back",
++          headerTitle: "Modifier le tag",
++          headerBackTitle: "Retour",
+           headerLargeTitle: false,
+           headerTransparent: false,
+           presentation: Platform.select({
+@@ -240,8 +240,8 @@ export default function Dashboard() {
+       <Stack.Screen
+         name="archive"
+         options={{
+-          headerTitle: "🗄️ Archive",
+-          headerBackTitle: "Back",
++          headerTitle: "🗄️ Archives",
++          headerBackTitle: "Retour",
+           headerRight: () => <BookmarkListHeader />,
+         }}
+       />
+@@ -250,85 +250,85 @@ export default function Dashboard() {
+         options={{
+           ...formSheetSurfaceOptions,
+           ...settingsScreenOptions,
+-          headerTitle: "Settings",
++          headerTitle: "Réglages",
+           headerTransparent: false,
+           presentation: Platform.select({
+             ios: "formSheet" as const,
+             default: "modal" as const,
+           }),
+-          title: "Settings",
++          title: "Réglages",
+         }}
+       />
+       <Stack.Screen
+         name="settings/reading"
+         options={{
+           ...settingsScreenOptions,
+-          headerBackTitle: "Settings",
+-          headerTitle: "Reader View",
+-          title: "Reader View",
++          headerBackTitle: "Réglages",
++          headerTitle: "Mode lecture",
++          title: "Mode lecture",
+         }}
+       />
+       <Stack.Screen
+         name="settings/uploads"
+         options={{
+           ...settingsScreenOptions,
+-          headerBackTitle: "Settings",
+-          headerTitle: "Uploads",
+-          title: "Uploads",
++          headerBackTitle: "Réglages",
++          headerTitle: "Envois",
++          title: "Envois",
+         }}
+       />
+       <Stack.Screen
+         name="settings/theme"
+         options={{
+           ...settingsScreenOptions,
+-          title: "Theme",
+-          headerTitle: "Theme",
+-          headerBackTitle: "Back",
++          title: "Thème",
++          headerTitle: "Thème",
++          headerBackTitle: "Retour",
+         }}
+       />
+       <Stack.Screen
+         name="settings/bookmark-default-view"
+         options={{
+           ...settingsScreenOptions,
+-          title: "Open Bookmarks In",
+-          headerTitle: "Open Bookmarks In",
+-          headerBackTitle: "Back",
++          title: "Ouvrir les marque-pages dans",
++          headerTitle: "Ouvrir les marque-pages dans",
++          headerBackTitle: "Retour",
+         }}
+       />
+       <Stack.Screen
+         name="settings/reader-settings"
+         options={{
+           ...settingsScreenOptions,
+-          title: "Text and Layout",
+-          headerTitle: "Text and Layout",
+-          headerBackTitle: "Back",
++          title: "Texte et mise en page",
++          headerTitle: "Texte et mise en page",
++          headerBackTitle: "Retour",
+         }}
+       />
+       <Stack.Screen
+         name="settings/offline"
+         options={{
+           ...settingsScreenOptions,
+-          title: "Downloads",
+-          headerTitle: "Downloads",
+-          headerBackTitle: "Back",
++          title: "Téléchargements",
++          headerTitle: "Téléchargements",
++          headerBackTitle: "Retour",
+         }}
+       />
+       <Stack.Screen
+         name="settings/usage"
+         options={{
+           ...settingsScreenOptions,
+-          title: "Statistics",
+-          headerTitle: "Statistics",
+-          headerBackTitle: "Back",
++          title: "Statistiques",
++          headerTitle: "Statistiques",
++          headerBackTitle: "Retour",
+         }}
+       />
+       <Stack.Screen
+         name="settings/toolbar-settings"
+         options={{
+           ...settingsScreenOptions,
+-          title: "Reader Toolbar",
+-          headerTitle: "Reader Toolbar",
+-          headerBackTitle: "Back",
++          title: "Barre d’outils du lecteur",
++          headerTitle: "Barre d’outils du lecteur",
++          headerBackTitle: "Retour",
+         }}
+       />
+     </Stack>
+diff --git a/apps/mobile/app/dashboard/bookmarks/[slug]/index.tsx b/apps/mobile/app/dashboard/bookmarks/[slug]/index.tsx
+index 128e527..94d12e5 100644
+--- a/apps/mobile/app/dashboard/bookmarks/[slug]/index.tsx
++++ b/apps/mobile/app/dashboard/bookmarks/[slug]/index.tsx
+@@ -116,7 +116,7 @@ export default function BookmarkView() {
+       <Stack.Screen
+         options={{
+           headerTitle: title ?? "",
+-          headerBackTitle: "Back",
++          headerBackTitle: "Retour",
+           headerTransparent: false,
+           headerShown: true,
+           headerStyle: {
+diff --git a/apps/mobile/app/dashboard/bookmarks/[slug]/info.tsx b/apps/mobile/app/dashboard/bookmarks/[slug]/info.tsx
+index 8a0b9cd..cfab295 100644
+--- a/apps/mobile/app/dashboard/bookmarks/[slug]/info.tsx
++++ b/apps/mobile/app/dashboard/bookmarks/[slug]/info.tsx
+@@ -66,10 +66,10 @@ function TitleEditor({
+ }) {
+   const { colors } = useColorScheme();
+   return (
+-    <GroupedSection header="Title">
++    <GroupedSection header="Titre">
+       <TextInput
+         editable={!isPending && !disabled}
+-        placeholder="Untitled"
++        placeholder="Sans titre"
+         placeholderTextColor={colors.grey}
+         onChangeText={(text) => setTitle(text)}
+         defaultValue={title ?? ""}
+@@ -96,7 +96,7 @@ function NotesEditor({
+       <TextInput
+         editable={!isPending && !disabled}
+         multiline
+-        placeholder="Add notes..."
++        placeholder="Ajouter des notes..."
+         placeholderTextColor={colors.grey}
+         onChangeText={(text) => setNotes(text)}
+         textAlignVertical="top"
+@@ -142,7 +142,7 @@ function TagList({
+       )}
+       {!readOnly && (
+         <NavigationRow
+-          label="Manage Tags"
++          label="Gérer les tags"
+           onPress={() =>
+             router.push(`/dashboard/bookmarks/${bookmark.id}/manage_tags`)
+           }
+@@ -154,9 +154,9 @@ function TagList({
+ 
+ function ManageLists({ bookmark }: { bookmark: ZBookmark }) {
+   return (
+-    <GroupedSection header="Lists">
++    <GroupedSection header="Listes">
+       <NavigationRow
+-        label="Manage Lists"
++        label="Gérer les listes"
+         onPress={() =>
+           router.push(`/dashboard/bookmarks/${bookmark.id}/manage_lists`)
+         }
+@@ -179,7 +179,7 @@ function AISummarySection({
+   const { mutate: summarize, isPending: isSummarizing } = useSummarizeBookmark({
+     onError: () => {
+       toast({
+-        message: "Failed to generate summary",
++        message: "Échec de la génération du résumé",
+         showProgress: false,
+       });
+     },
+@@ -188,11 +188,11 @@ function AISummarySection({
+   const { mutate: resummarize, isPending: isResummarizing } =
+     useSummarizeBookmark({
+       onSuccess: () => {
+-        toast({ message: "Summary regenerated!", showProgress: false });
++        toast({ message: "Résumé régénéré !", showProgress: false });
+       },
+       onError: () => {
+         toast({
+-          message: "Failed to regenerate summary",
++          message: "Échec de la régénération du résumé",
+           showProgress: false,
+         });
+       },
+@@ -202,7 +202,7 @@ function AISummarySection({
+     useUpdateBookmark({
+       onError: () => {
+         toast({
+-          message: "Failed to delete summary",
++          message: "Échec de la suppression du résumé",
+           showProgress: false,
+         });
+       },
+@@ -214,7 +214,7 @@ function AISummarySection({
+ 
+   if (bookmark.summary) {
+     return (
+-      <GroupedSection header="AI Summary">
++      <GroupedSection header="Résumé IA">
+         <Pressable
+           onPress={() => setIsExpanded(!isExpanded)}
+           className="px-4 py-3"
+@@ -283,12 +283,12 @@ function AISummarySection({
+         {isSummarizing ? (
+           <>
+             <ActivityIndicator size="small" color={colors.primary} />
+-            <Text className="text-primary">Generating...</Text>
++            <Text className="text-primary">Génération...</Text>
+           </>
+         ) : (
+           <>
+             <Sparkles size={16} color={colors.primary} />
+-            <Text className="text-primary">Summarize with AI</Text>
++            <Text className="text-primary">Résumer avec l’IA</Text>
+           </>
+         )}
+       </Pressable>
+@@ -303,7 +303,7 @@ function BookmarkActionsSection({ bookmark }: { bookmark: ZBookmark }) {
+ 
+   const onError = () => {
+     toast({
+-      message: "Something went wrong",
++      message: "Une erreur s’est produite",
+       variant: "destructive",
+       showProgress: false,
+     });
+@@ -423,7 +423,7 @@ function BookmarkActionsSection({ bookmark }: { bookmark: ZBookmark }) {
+         className="flex-row items-center gap-3 px-4 py-3 active:opacity-70"
+       >
+         <Share2 size={20} color={actionIconColor} />
+-        <Text numberOfLines={1}>Share Bookmark</Text>
++        <Text numberOfLines={1}>Partager le marque-page</Text>
+       </Pressable>
+     </GroupedSection>
+   );
+@@ -449,7 +449,7 @@ const ViewBookmarkPage = () => {
+ 
+   const { mutate: editBookmark, isPending: isEditPending } = useUpdateBookmark({
+     onSuccess: () => {
+-      toast({ message: "Bookmark updated!", showProgress: false });
++      toast({ message: "Marque-page mis à jour !", showProgress: false });
+       if (router.canGoBack()) {
+         router.back();
+       } else {
+@@ -457,7 +457,7 @@ const ViewBookmarkPage = () => {
+       }
+     },
+     onError: () => {
+-      toast({ message: "Failed to save changes", showProgress: false });
++      toast({ message: "Échec de l’enregistrement des modifications", showProgress: false });
+     },
+   });
+ 
+@@ -465,7 +465,7 @@ const ViewBookmarkPage = () => {
+     useDeleteBookmark({
+       onSuccess: () => {
+         router.replace("dashboard");
+-        toast({ message: "Bookmark deleted!", showProgress: false });
++        toast({ message: "Marque-page supprimé !", showProgress: false });
+       },
+     });
+ 
+@@ -502,12 +502,12 @@ const ViewBookmarkPage = () => {
+   const handleDeleteBookmark = () => {
+     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+     Alert.alert(
+-      "Delete Bookmark",
+-      "Are you sure you want to delete this bookmark?",
++      "Supprimer le marque-page",
++      "Voulez-vous vraiment supprimer ce marque-page ?",
+       [
+-        { text: "Cancel", style: "cancel" },
++        { text: "Annuler", style: "cancel" },
+         {
+-          text: "Delete",
++          text: "Supprimer",
+           onPress: () => deleteBookmark({ bookmarkId: bookmark.id }),
+           style: "destructive",
+         },
+@@ -534,7 +534,7 @@ const ViewBookmarkPage = () => {
+         options={{
+           headerShown: true,
+           headerTransparent: false,
+-          headerTitle: "Edit Bookmark",
++          headerTitle: "Modifier le marque-page",
+           headerRight: () => (
+             <Pressable
+               onPress={onDone}
+@@ -549,7 +549,7 @@ const ViewBookmarkPage = () => {
+                     hasChanges ? "font-semibold text-primary" : "text-primary"
+                   }
+                 >
+-                  {hasChanges ? "Save" : "Done"}
++                  {hasChanges ? "Enregistrer" : "Terminé"}
+                 </Text>
+               )}
+             </Pressable>
+@@ -593,7 +593,7 @@ const ViewBookmarkPage = () => {
+               className="items-center px-4 py-3 active:opacity-70"
+             >
+               <Text className="text-destructive" numberOfLines={1}>
+-                {isDeletionPending ? "Deleting..." : "Delete Bookmark"}
++                {isDeletionPending ? "Suppression..." : "Supprimer le marque-page"}
+               </Text>
+             </Pressable>
+           </GroupedSection>
+diff --git a/apps/mobile/app/dashboard/bookmarks/[slug]/manage_lists.tsx b/apps/mobile/app/dashboard/bookmarks/[slug]/manage_lists.tsx
+index b4b86c0..8215302 100644
+--- a/apps/mobile/app/dashboard/bookmarks/[slug]/manage_lists.tsx
++++ b/apps/mobile/app/dashboard/bookmarks/[slug]/manage_lists.tsx
+@@ -43,7 +43,7 @@ const ListPickerPage = () => {
+   const { toast } = useToast();
+   const onError = () => {
+     toast({
+-      message: "Something went wrong",
++      message: "Une erreur s’est produite",
+       variant: "destructive",
+       showProgress: false,
+     });
+@@ -72,7 +72,7 @@ const ListPickerPage = () => {
+   } = useAddBookmarkToList({
+     onSuccess: () => {
+       toast({
+-        message: "Added to list!",
++        message: "Ajouté à la liste !",
+         showProgress: false,
+       });
+     },
+@@ -86,7 +86,7 @@ const ListPickerPage = () => {
+   } = useRemoveBookmarkFromList({
+     onSuccess: () => {
+       toast({
+-        message: "Removed from list!",
++        message: "Retiré de la liste !",
+         showProgress: false,
+       });
+     },
+@@ -146,11 +146,11 @@ const ListPickerPage = () => {
+         options={{
+           headerShown: true,
+           headerTransparent: false,
+-          headerTitle: "Manage Lists",
++          headerTitle: "Gérer les listes",
+           headerRight: () => (
+             <Link href="/dashboard/lists/new" asChild>
+               <Pressable
+-                accessibilityLabel="Create list"
++                accessibilityLabel="Créer une liste"
+                 accessibilityRole="button"
+                 hitSlop={8}
+                 className="px-2"
+@@ -172,7 +172,7 @@ const ListPickerPage = () => {
+         <ListPicker
+           options={options}
+           onSelect={toggleList}
+-          emptyMessage="No lists available"
++          emptyMessage="Aucune liste disponible"
+         />
+       </ScrollView>
+     </>
+diff --git a/apps/mobile/app/dashboard/bookmarks/[slug]/manage_tags.tsx b/apps/mobile/app/dashboard/bookmarks/[slug]/manage_tags.tsx
+index b00676a..ede6553 100644
+--- a/apps/mobile/app/dashboard/bookmarks/[slug]/manage_tags.tsx
++++ b/apps/mobile/app/dashboard/bookmarks/[slug]/manage_tags.tsx
+@@ -31,7 +31,7 @@ const TagPickerPage = () => {
+   const { toast } = useToast();
+   const onError = () => {
+     toast({
+-      message: "Something went wrong",
++      message: "Une erreur s’est produite",
+       variant: "destructive",
+       showProgress: false,
+     });
+@@ -150,11 +150,11 @@ const TagPickerPage = () => {
+       toast({
+         message: isAttaching
+           ? isBulkUpdate
+-            ? "Tags added!"
+-            : "Tag added!"
++            ? "Tags ajoutés !"
++            : "Tag ajouté !"
+           : isBulkUpdate
+-            ? "Tags removed!"
+-            : "Tag removed!",
++            ? "Tags retirés !"
++            : "Tag retiré !",
+         showProgress: false,
+       });
+     },
+@@ -217,7 +217,7 @@ const TagPickerPage = () => {
+       <Stack.Screen
+         options={{
+           headerSearchBarOptions: {
+-            placeholder: "Search Tags",
++            placeholder: "Rechercher des tags",
+             onChangeText: (event) => setSearch(event.nativeEvent.text),
+             autoCapitalize: "none",
+             hideWhenScrolling: false,
+@@ -228,7 +228,7 @@ const TagPickerPage = () => {
+               disabled={optimisticTags.length === 0}
+               className={`px-2 ${optimisticTags.length === 0 ? "opacity-50" : ""}`}
+             >
+-              <Text className="text-primary">Clear</Text>
++              <Text className="text-primary">Effacer</Text>
+             </Pressable>
+           ),
+         }}
+@@ -244,7 +244,7 @@ const TagPickerPage = () => {
+         className="flex-1 bg-background"
+       >
+         {optimisticTags.length > 0 && (
+-          <GroupedSection header="Attached">
++          <GroupedSection header="Joints">
+             {optimisticTags.map((tag, index) => (
+               <React.Fragment key={tag.id}>
+                 {index > 0 && <RowSeparator />}
+@@ -260,7 +260,7 @@ const TagPickerPage = () => {
+           </GroupedSection>
+         )}
+         {filteredAllTags.length > 0 && (
+-          <GroupedSection header="All Tags">
++          <GroupedSection header="Tous les tags">
+             {filteredAllTags.map((tag, index) => (
+               <React.Fragment key={tag.id}>
+                 {index > 0 && <RowSeparator />}
+@@ -285,7 +285,7 @@ const TagPickerPage = () => {
+         )}
+         {optimisticTags.length === 0 && filteredAllTags.length === 0 && (
+           <View className="items-center py-12">
+-            <Text color="tertiary">No tags found</Text>
++            <Text color="tertiary">Aucun tag trouvé</Text>
+           </View>
+         )}
+       </ScrollView>
+diff --git a/apps/mobile/app/dashboard/bookmarks/new.tsx b/apps/mobile/app/dashboard/bookmarks/new.tsx
+index 076ad4e..8657cf6 100644
+--- a/apps/mobile/app/dashboard/bookmarks/new.tsx
++++ b/apps/mobile/app/dashboard/bookmarks/new.tsx
+@@ -22,7 +22,7 @@ const NoteEditorPage = () => {
+     onSuccess: (resp) => {
+       if (resp.alreadyExists) {
+         toast({
+-          message: "Bookmark saved again",
++          message: "Marque-page enregistré à nouveau",
+         });
+       }
+       setText("");
+@@ -34,7 +34,7 @@ const NoteEditorPage = () => {
+         const zodError = e.data.zodError;
+         message = JSON.stringify(zodError);
+       } else {
+-        message = `Something went wrong: ${e.message}`;
++        message = `Une erreur s’est produite : ${e.message}`;
+       }
+       setError(message);
+     },
+@@ -66,13 +66,13 @@ const NoteEditorPage = () => {
+         onChangeText={setText}
+         className="bg-card"
+         multiline
+-        placeholder="What's on your mind?"
++        placeholder="À quoi pensez-vous ?"
+         autoFocus
+         autoCapitalize={"none"}
+         textAlignVertical="top"
+       />
+       <Button onPress={onSubmit} disabled={isPending}>
+-        <Text>Save</Text>
++        <Text>Enregistrer</Text>
+       </Button>
+     </View>
+   );
+diff --git a/apps/mobile/app/dashboard/lists/[slug]/edit.tsx b/apps/mobile/app/dashboard/lists/[slug]/edit.tsx
+index ba0b172..3c5b5a0 100644
+--- a/apps/mobile/app/dashboard/lists/[slug]/edit.tsx
++++ b/apps/mobile/app/dashboard/lists/[slug]/edit.tsx
+@@ -33,7 +33,7 @@ const EditListPage = () => {
+     },
+     onError: (error) => {
+       // Extract error message from the error object
+-      let errorMessage = "Something went wrong";
++      let errorMessage = "Une erreur s’est produite";
+       if (error.data?.zodError) {
+         errorMessage = Object.values(error.data.zodError.fieldErrors)
+           .flat()
+@@ -82,13 +82,13 @@ const EditListPage = () => {
+ 
+   const onSubmit = () => {
+     if (!text.trim()) {
+-      toast({ message: "List name can't be empty", variant: "destructive" });
++      toast({ message: "Le nom de la liste ne peut pas être vide", variant: "destructive" });
+       return;
+     }
+ 
+     if (list?.type === "smart" && !query.trim()) {
+       toast({
+-        message: "Smart lists must have a search query",
++        message: "Les listes intelligentes doivent avoir une requête de recherche",
+         variant: "destructive",
+       });
+       return;
+@@ -119,14 +119,14 @@ const EditListPage = () => {
+         >
+           {/* List Type Info - not editable */}
+           <View className="gap-2">
+-            <Text className="text-sm text-muted-foreground">List Type</Text>
++            <Text className="text-sm text-muted-foreground">Type de liste</Text>
+             <View className="flex flex-row gap-2">
+               <View className="flex-1">
+                 <Button
+                   variant={list?.type === "manual" ? "primary" : "secondary"}
+                   disabled
+                 >
+-                  <Text>Manual</Text>
++                  <Text>Manuelle</Text>
+                 </Button>
+               </View>
+               <View className="flex-1">
+@@ -134,7 +134,7 @@ const EditListPage = () => {
+                   variant={list?.type === "smart" ? "primary" : "secondary"}
+                   disabled
+                 >
+-                  <Text>Smart</Text>
++                  <Text>Intelligente</Text>
+                 </Button>
+               </View>
+             </View>
+@@ -144,11 +144,11 @@ const EditListPage = () => {
+ 
+           <Input
+             className="bg-card"
+-            label="List Name"
++            label="Nom de la liste"
+             labelClasses="text-sm text-muted-foreground"
+             onChangeText={setText}
+             value={text}
+-            placeholder="Reading list"
++            placeholder="Liste de lecture"
+             autoFocus
+             autoCapitalize="sentences"
+           />
+@@ -171,7 +171,7 @@ const EditListPage = () => {
+           {list.userRole === "owner" && (
+             <GroupedSection>
+               <NavigationRow
+-                label="Sharing & Access"
++                label="Partage et accès"
+                 onPress={() =>
+                   router.push(`/dashboard/lists/${listId}/sharing`)
+                 }
+@@ -189,7 +189,7 @@ const EditListPage = () => {
+                 className="bg-card"
+                 onChangeText={setQuery}
+                 value={query}
+-                placeholder="e.g., #important OR list:work"
++                placeholder="ex. #important OR list:work"
+                 autoCapitalize={"none"}
+               />
+               <Text className="text-xs italic text-muted-foreground">
+@@ -200,7 +200,7 @@ const EditListPage = () => {
+           )}
+ 
+           <Button disabled={editIsPending} onPress={onSubmit}>
+-            <Text>Save</Text>
++            <Text>Enregistrer</Text>
+           </Button>
+         </ScrollView>
+       )}
+diff --git a/apps/mobile/app/dashboard/lists/[slug]/index.tsx b/apps/mobile/app/dashboard/lists/[slug]/index.tsx
+index 164471b..398fa45 100644
+--- a/apps/mobile/app/dashboard/lists/[slug]/index.tsx
++++ b/apps/mobile/app/dashboard/lists/[slug]/index.tsx
+@@ -33,7 +33,7 @@ export default function ListView() {
+       <Stack.Screen
+         options={{
+           headerTitle: list ? `${list.icon} ${list.name}` : "",
+-          headerBackTitle: "Back",
++          headerBackTitle: "Retour",
+           headerRight: () => (
+             <ListActionsMenu listId={slug} role={list?.userRole ?? "viewer"} />
+           ),
+@@ -83,10 +83,10 @@ function ListActionsMenu({
+   );
+ 
+   const handleDelete = () => {
+-    Alert.alert("Delete List", "Are you sure you want to delete this list?", [
+-      { text: "Cancel", style: "cancel" },
++    Alert.alert("Supprimer la liste", "Voulez-vous vraiment supprimer cette liste ?", [
++      { text: "Annuler", style: "cancel" },
+       {
+-        text: "Delete",
++        text: "Supprimer",
+         onPress: () => {
+           deleteList({ listId });
+         },
+@@ -96,10 +96,10 @@ function ListActionsMenu({
+   };
+ 
+   const handleLeave = () => {
+-    Alert.alert("Leave List", "Are you sure you want to leave this list?", [
+-      { text: "Cancel", style: "cancel" },
++    Alert.alert("Quitter la liste", "Voulez-vous vraiment quitter cette liste ?", [
++      { text: "Annuler", style: "cancel" },
+       {
+-        text: "Leave",
++        text: "Quitter",
+         onPress: () => {
+           leaveList({ listId });
+         },
+@@ -120,7 +120,7 @@ function ListActionsMenu({
+       actions={[
+         {
+           id: "edit",
+-          title: "Edit List",
++          title: "Modifier la liste",
+           attributes: {
+             hidden: role !== "owner",
+           },
+@@ -133,14 +133,14 @@ function ListActionsMenu({
+         },
+         {
+           id: "sharing",
+-          title: role === "owner" ? "Sharing & Access" : "People with Access",
++          title: role === "owner" ? "Partage et accès" : "Personnes ayant accès",
+           attributes: { hidden: role === "public" },
+           image: Platform.select({ ios: "person.2" }),
+           imageColor: Platform.select({ ios: menuIconColor }),
+         },
+         {
+           id: "delete_list",
+-          title: "Delete List",
++          title: "Supprimer la liste",
+           attributes: {
+             destructive: true,
+             hidden: role !== "owner",
+@@ -155,7 +155,7 @@ function ListActionsMenu({
+         ...layoutActions,
+         {
+           id: "leave",
+-          title: "Leave List",
++          title: "Quitter la liste",
+           attributes: {
+             destructive: true,
+             hidden: role === "owner",
+diff --git a/apps/mobile/app/dashboard/lists/[slug]/sharing.tsx b/apps/mobile/app/dashboard/lists/[slug]/sharing.tsx
+index bc0f913..6aca8ba 100644
+--- a/apps/mobile/app/dashboard/lists/[slug]/sharing.tsx
++++ b/apps/mobile/app/dashboard/lists/[slug]/sharing.tsx
+@@ -22,14 +22,14 @@ export default function ListSharingPage() {
+     <>
+       <Stack.Screen
+         options={{
+-          headerTitle: "Sharing & Access",
++          headerTitle: "Partage et accès",
+           headerRight: () => (
+             <Pressable
+               accessibilityRole="button"
+               onPress={() => router.back()}
+               className="px-2"
+             >
+-              <Text className="text-primary">Done</Text>
++              <Text className="text-primary">Terminé</Text>
+             </Pressable>
+           ),
+         }}
+diff --git a/apps/mobile/app/dashboard/lists/new.tsx b/apps/mobile/app/dashboard/lists/new.tsx
+index 1847244..cf75a04 100644
+--- a/apps/mobile/app/dashboard/lists/new.tsx
++++ b/apps/mobile/app/dashboard/lists/new.tsx
+@@ -39,7 +39,7 @@ const NewListPage = () => {
+     },
+     onError: (error) => {
+       // Extract error message from the error object
+-      let errorMessage = "Something went wrong";
++      let errorMessage = "Une erreur s’est produite";
+       if (error.data?.zodError) {
+         errorMessage = Object.values(error.data.zodError.fieldErrors)
+           .flat()
+@@ -58,7 +58,7 @@ const NewListPage = () => {
+     // Validate smart list has a query
+     if (listType === "smart" && !query.trim()) {
+       toast({
+-        message: "Smart lists must have a search query",
++        message: "Les listes intelligentes doivent avoir une requête de recherche",
+         variant: "destructive",
+       });
+       return;
+@@ -81,14 +81,14 @@ const NewListPage = () => {
+     >
+       {/* List Type Selector */}
+       <View className="gap-2">
+-        <Text className="text-sm text-muted-foreground">List Type</Text>
++        <Text className="text-sm text-muted-foreground">Type de liste</Text>
+         <View className="flex flex-row gap-2">
+           <View className="flex-1">
+             <Button
+               variant={listType === "manual" ? "primary" : "secondary"}
+               onPress={() => setListType("manual")}
+             >
+-              <Text>Manual</Text>
++              <Text>Manuelle</Text>
+             </Button>
+           </View>
+           <View className="flex-1">
+@@ -96,7 +96,7 @@ const NewListPage = () => {
+               variant={listType === "smart" ? "primary" : "secondary"}
+               onPress={() => setListType("smart")}
+             >
+-              <Text>Smart</Text>
++              <Text>Intelligente</Text>
+             </Button>
+           </View>
+         </View>
+@@ -106,10 +106,10 @@ const NewListPage = () => {
+ 
+       <Input
+         className="bg-card"
+-        label="List Name"
++        label="Nom de la liste"
+         labelClasses="text-sm text-muted-foreground"
+         onChangeText={setText}
+-        placeholder="Reading list"
++        placeholder="Liste de lecture"
+         autoFocus
+         autoCapitalize="sentences"
+       />
+@@ -130,12 +130,12 @@ const NewListPage = () => {
+       {/* Smart List Query Input */}
+       {listType === "smart" && (
+         <View className="gap-2">
+-          <Text className="text-sm text-muted-foreground">Search Query</Text>
++          <Text className="text-sm text-muted-foreground">Requête de recherche</Text>
+           <Input
+             className="bg-card"
+             onChangeText={setQuery}
+             value={query}
+-            placeholder="e.g., #important OR list:work"
++            placeholder="ex. #important OR list:work"
+             autoCapitalize={"none"}
+           />
+           <Text className="text-xs italic text-muted-foreground">
+@@ -145,7 +145,7 @@ const NewListPage = () => {
+       )}
+ 
+       <Button disabled={isPending} onPress={onSubmit}>
+-        <Text>Save</Text>
++        <Text>Enregistrer</Text>
+       </Button>
+     </ScrollView>
+   );
+diff --git a/apps/mobile/app/dashboard/lists/select-parent.tsx b/apps/mobile/app/dashboard/lists/select-parent.tsx
+index 92fa60e..8c357d9 100644
+--- a/apps/mobile/app/dashboard/lists/select-parent.tsx
++++ b/apps/mobile/app/dashboard/lists/select-parent.tsx
+@@ -76,7 +76,7 @@ export default function SelectListParentPage() {
+       : [
+           {
+             id: NO_PARENT_VALUE,
+-            label: "No parent",
++            label: "Aucun parent",
+             state: selectedId === null ? ("selected" as const) : undefined,
+           },
+         ]),
+@@ -90,9 +90,9 @@ export default function SelectListParentPage() {
+     <>
+       <Stack.Screen
+         options={{
+-          headerTitle: "Parent List",
++          headerTitle: "Liste parente",
+           headerSearchBarOptions: {
+-            placeholder: "Search Lists",
++            placeholder: "Rechercher des listes",
+             autoCapitalize: "none",
+             hideWhenScrolling: false,
+             onChangeText: (event) => setSearch(event.nativeEvent.text),
+@@ -108,7 +108,7 @@ export default function SelectListParentPage() {
+         <ListPicker
+           options={options}
+           onSelect={(id) => selectParent(id === NO_PARENT_VALUE ? null : id)}
+-          emptyMessage="No lists found"
++          emptyMessage="Aucune liste trouvée"
+         />
+       </ScrollView>
+     </>
+diff --git a/apps/mobile/app/dashboard/settings/bookmark-default-view.tsx b/apps/mobile/app/dashboard/settings/bookmark-default-view.tsx
+index 6223070..abf34a0 100644
+--- a/apps/mobile/app/dashboard/settings/bookmark-default-view.tsx
++++ b/apps/mobile/app/dashboard/settings/bookmark-default-view.tsx
+@@ -23,13 +23,13 @@ export default function BookmarkDefaultViewSettings() {
+         defaultBookmarkView: mode,
+       });
+       toast({
+-        message: "Bookmark opening preference updated",
++        message: "Préférence d’ouverture des marque-pages mise à jour",
+         showProgress: false,
+       });
+       router.back();
+     } catch {
+       toast({
+-        message: "Something went wrong",
++        message: "Une erreur s’est produite",
+         variant: "destructive",
+         showProgress: false,
+       });
+@@ -40,16 +40,16 @@ export default function BookmarkDefaultViewSettings() {
+ 
+   return (
+     <SettingsScreen>
+-      <SettingsGroup footer="Choose what opens when you tap a bookmark.">
++      <SettingsGroup footer="Choisissez ce qui s’ouvre quand vous touchez un marque-page.">
+         {modes.map((mode, index) => (
+           <View key={mode}>
+             {index > 0 ? <SettingsSeparator /> : null}
+             <SettingsChoiceRow
+               label={
+                 {
+-                  browser: "Browser",
+-                  externalBrowser: "External Browser",
+-                  reader: "Reader",
++                  browser: "Navigateur",
++                  externalBrowser: "Navigateur externe",
++                  reader: "Lecteur",
+                 }[mode]
+               }
+               onPress={() => void handleUpdate(mode)}
+diff --git a/apps/mobile/app/dashboard/settings/index.tsx b/apps/mobile/app/dashboard/settings/index.tsx
+index da655df..083d0b5 100644
+--- a/apps/mobile/app/dashboard/settings/index.tsx
++++ b/apps/mobile/app/dashboard/settings/index.tsx
+@@ -56,16 +56,16 @@ export default function Settings() {
+         setShowPasswordModal(false);
+         setPassword("");
+         Alert.alert(
+-          "Account Deleted",
+-          "Your account has been successfully deleted.",
++          "Compte supprimé",
++          "Votre compte a bien été supprimé.",
+           [{ text: "OK", onPress: logout }],
+         );
+       },
+       onError: (mutationError) => {
+         if (mutationError.data?.code === "UNAUTHORIZED") {
+-          Alert.alert("Error", "Invalid password. Please try again.");
++          Alert.alert("Erreur", "Mot de passe invalide. Veuillez réessayer.");
+         } else {
+-          Alert.alert("Error", "Failed to delete account. Please try again.");
++          Alert.alert("Erreur", "Échec de la suppression du compte. Veuillez réessayer.");
+         }
+       },
+     }),
+@@ -84,12 +84,12 @@ export default function Settings() {
+ 
+   const handleDeleteAccount = () => {
+     Alert.alert(
+-      "Delete Account",
+-      "Are you sure you want to delete your account? All your bookmarks, lists, tags, highlights, and other data will be permanently deleted. This action cannot be undone.",
++      "Supprimer le compte",
++      "Voulez-vous vraiment supprimer votre compte ? Tous vos marque-pages, listes, tags, surlignages et autres données seront définitivement supprimés. Cette action est irréversible.",
+       [
+-        { text: "Cancel", style: "cancel" },
++        { text: "Annuler", style: "cancel" },
+         {
+-          text: "Delete",
++          text: "Supprimer",
+           style: "destructive",
+           onPress: () => {
+             if (data?.localUser ?? false) {
+@@ -111,16 +111,16 @@ export default function Settings() {
+         email={data?.email}
+       />
+ 
+-      <SettingsGroup header="Preferences">
++      <SettingsGroup header="Préférences">
+         <SettingsNavigationRow
+-          label="Theme"
++          label="Thème"
+           onPress={() => router.push("/dashboard/settings/theme")}
+           value={THEME_LABELS[settings.theme]}
+         />
+         <SettingsSeparator />
+         <SettingsNavigationRow
+           isLoading={isLoading}
+-          label="Open bookmarks in"
++          label="Ouvrir les marque-pages dans"
+           onPress={() =>
+             router.push("/dashboard/settings/bookmark-default-view")
+           }
+@@ -128,61 +128,61 @@ export default function Settings() {
+         />
+         <SettingsSeparator />
+         <SettingsNavigationRow
+-          label="Reader View"
++          label="Mode lecture"
+           onPress={() => router.push("/dashboard/settings/reading")}
+         />
+         <SettingsSeparator />
+         <SettingsNavigationRow
+           isLoading={isLoading}
+-          label="Uploads"
++          label="Envois"
+           onPress={() => router.push("/dashboard/settings/uploads")}
+           value={getUploadQualityLabel(settings.imageQuality)}
+         />
+       </SettingsGroup>
+ 
+-      <SettingsGroup header="Data">
++      <SettingsGroup header="Données">
+         <SettingsNavigationRow
+-          label="Downloads"
++          label="Téléchargements"
+           onPress={() => router.push("/dashboard/settings/offline")}
+           value={String(offlineLibrary.length)}
+         />
+         <SettingsSeparator />
+         <SettingsNavigationRow
+-          label="Statistics"
++          label="Statistiques"
+           onPress={() => router.push("/dashboard/settings/usage")}
+         />
+       </SettingsGroup>
+ 
+-      <SettingsGroup header="Account">
+-        <SettingsActionRow label="Log Out" onPress={logout} />
++      <SettingsGroup header="Compte">
++        <SettingsActionRow label="Se déconnecter" onPress={logout} />
+         <SettingsSeparator />
+         <SettingsActionRow
+           disabled={isDeleting}
+           isLoading={isDeleting}
+-          label="Delete Account"
++          label="Supprimer le compte"
+           onPress={handleDeleteAccount}
+         />
+       </SettingsGroup>
+ 
+-      <SettingsGroup header="About">
++      <SettingsGroup header="À propos">
+         <SettingsValueRow
+-          label="Server"
+-          value={isLoading ? "Loading..." : settings.address}
++          label="Serveur"
++          value={isLoading ? "Chargement..." : settings.address}
+         />
+         <SettingsSeparator />
+         <SettingsValueRow
+-          label="App Version"
+-          value={Constants.expoConfig?.version ?? "Unknown"}
++          label="Version de l’appli"
++          value={Constants.expoConfig?.version ?? "Inconnu"}
+         />
+         <SettingsSeparator />
+         <SettingsValueRow
+-          label="Server Version"
++          label="Version du serveur"
+           value={
+             isServerVersionLoading
+-              ? "Loading..."
++              ? "Chargement..."
+               : serverVersionError
+-                ? "Unavailable"
+-                : (serverVersion ?? "Unknown")
++                ? "Indisponible"
++                : (serverVersion ?? "Inconnu")
+           }
+         />
+       </SettingsGroup>
+@@ -203,7 +203,7 @@ export default function Settings() {
+             onPress={(event) => event.stopPropagation()}
+             style={{ borderCurve: "continuous" }}
+           >
+-            <Text className="mb-2 text-lg font-bold">Enter Password</Text>
++            <Text className="mb-2 text-lg font-bold">Saisir le mot de passe</Text>
+             <Text className="mb-4 text-sm text-muted-foreground">
+               Enter your password to confirm account deletion.
+             </Text>
+@@ -211,7 +211,7 @@ export default function Settings() {
+               autoFocus
+               className="mb-4 rounded-lg border border-input bg-background px-3 py-2 text-foreground"
+               onChangeText={setPassword}
+-              placeholder="Password"
++              placeholder="Mot de passe"
+               secureTextEntry
+               value={password}
+             />
+@@ -220,7 +220,7 @@ export default function Settings() {
+                 className="rounded-lg px-4 py-2"
+                 onPress={closePasswordModal}
+               >
+-                <Text className="text-muted-foreground">Cancel</Text>
++                <Text className="text-muted-foreground">Annuler</Text>
+               </Pressable>
+               <Pressable
+                 className="rounded-lg bg-destructive px-4 py-2"
+diff --git a/apps/mobile/app/dashboard/settings/offline.tsx b/apps/mobile/app/dashboard/settings/offline.tsx
+index 1201bfd..c8158f1 100644
+--- a/apps/mobile/app/dashboard/settings/offline.tsx
++++ b/apps/mobile/app/dashboard/settings/offline.tsx
+@@ -75,12 +75,12 @@ export default function OfflineContent() {
+ 
+   const confirmRemove = (bookmarkId: string, displayTitle: string) => {
+     Alert.alert(
+-      "Remove offline copy?",
++      "Retirer la copie hors ligne ?",
+       `"${displayTitle}" will no longer be kept for offline reading.`,
+       [
+-        { text: "Cancel", style: "cancel" },
++        { text: "Annuler", style: "cancel" },
+         {
+-          text: "Remove",
++          text: "Retirer",
+           style: "destructive",
+           onPress: () => removeOfflineArticle(scope, bookmarkId),
+         },
+@@ -90,12 +90,12 @@ export default function OfflineContent() {
+ 
+   const confirmRemoveAll = () => {
+     Alert.alert(
+-      "Remove all offline content?",
+-      "This removes every article you explicitly saved for offline reading.",
++      "Retirer tout le contenu hors ligne ?",
++      "Cela retire tous les articles que vous avez enregistrés pour la lecture hors ligne.",
+       [
+-        { text: "Cancel", style: "cancel" },
++        { text: "Annuler", style: "cancel" },
+         {
+-          text: "Remove All",
++          text: "Tout retirer",
+           style: "destructive",
+           onPress: () => removeAllOfflineArticles(scope),
+         },
+@@ -105,17 +105,17 @@ export default function OfflineContent() {
+ 
+   const confirmClearRecentCache = () => {
+     Alert.alert(
+-      "Clear recent cache?",
+-      "Saved offline articles will be kept. Anything else will be re-cached as you browse.",
++      "Vider le cache récent ?",
++      "Les articles enregistrés hors ligne seront conservés. Le reste sera remis en cache au fil de votre navigation.",
+       [
+-        { text: "Cancel", style: "cancel" },
++        { text: "Annuler", style: "cancel" },
+         {
+-          text: "Clear Cache",
++          text: "Vider le cache",
+           style: "destructive",
+           onPress: () => {
+             queryClient.clear();
+             clearPersistedCache();
+-            toast({ message: "Recent cache cleared" });
++            toast({ message: "Cache récent vidé" });
+           },
+         },
+       ],
+@@ -132,15 +132,15 @@ export default function OfflineContent() {
+       <View className="gap-4">
+         <View className="gap-2">
+           <CacheSectionHeader
+-            title="Saved offline content"
++            title="Contenu enregistré hors ligne"
+             size={offlineLibrarySize}
+           />
+ 
+           {offlineLibrary.length === 0 ? (
+             <EmptyState
+               icon={BookOpen}
+-              title="No saved offline articles"
+-              subtitle="Open an article and choose Make available offline."
++              title="Aucun article enregistré hors ligne"
++              subtitle="Ouvrez un article et choisissez « Rendre disponible hors ligne »."
+             />
+           ) : (
+             <SettingsGroup>
+@@ -171,7 +171,7 @@ export default function OfflineContent() {
+                       </Text>
+                     </Pressable>
+                     <Pressable
+-                      accessibilityLabel={`Remove ${item.displayTitle} offline copy`}
++                      accessibilityLabel={`Retirer la copie hors ligne de ${item.displayTitle}`}
+                       className="ml-3 p-2"
+                       onPress={() =>
+                         confirmRemove(item.bookmarkId, item.displayTitle)
+@@ -190,7 +190,7 @@ export default function OfflineContent() {
+           <SettingsGroup>
+             <SettingsActionRow
+               centered
+-              label="Remove all offline content"
++              label="Retirer tout le contenu hors ligne"
+               onPress={confirmRemoveAll}
+             />
+           </SettingsGroup>
+@@ -198,11 +198,11 @@ export default function OfflineContent() {
+       </View>
+ 
+       <View className="gap-2">
+-        <CacheSectionHeader title="Recent cache" size={recentCacheSize} />
++        <CacheSectionHeader title="Cache récent" size={recentCacheSize} />
+         <SettingsGroup>
+           <SettingsActionRow
+             centered
+-            label="Clear recent cache"
++            label="Vider le cache récent"
+             onPress={confirmClearRecentCache}
+           />
+         </SettingsGroup>
+diff --git a/apps/mobile/app/dashboard/settings/reader-settings.tsx b/apps/mobile/app/dashboard/settings/reader-settings.tsx
+index 50d5115..9629d49 100644
+--- a/apps/mobile/app/dashboard/settings/reader-settings.tsx
++++ b/apps/mobile/app/dashboard/settings/reader-settings.tsx
+@@ -231,7 +231,7 @@ export default function ReaderSettingsPage() {
+         <SettingsActionRow
+           centered
+           disabled={!hasLocalOverrides}
+-          label="Save as Default (All Devices)"
++          label="Enregistrer par défaut (tous les appareils)"
+           onPress={handleSaveAsDefault}
+           tone="primary"
+         />
+@@ -240,7 +240,7 @@ export default function ReaderSettingsPage() {
+             <SettingsSeparator />
+             <SettingsActionRow
+               centered
+-              label="Clear Local Overrides"
++              label="Effacer les réglages locaux"
+               leading={
+                 <RotateCcw size={16} color={isDark ? "#9ca3af" : "#6b7280"} />
+               }
+@@ -254,7 +254,7 @@ export default function ReaderSettingsPage() {
+             <SettingsSeparator />
+             <SettingsActionRow
+               centered
+-              label="Clear Server Defaults"
++              label="Effacer les réglages du serveur"
+               leading={
+                 <RotateCcw size={16} color={isDark ? "#9ca3af" : "#6b7280"} />
+               }
+diff --git a/apps/mobile/app/dashboard/settings/reading.tsx b/apps/mobile/app/dashboard/settings/reading.tsx
+index b2a5bf7..883ae2b 100644
+--- a/apps/mobile/app/dashboard/settings/reading.tsx
++++ b/apps/mobile/app/dashboard/settings/reading.tsx
+@@ -14,22 +14,22 @@ export default function ReaderViewSettings() {
+ 
+   return (
+     <SettingsScreen>
+-      <SettingsGroup header="Reader">
++      <SettingsGroup header="Lecteur">
+         <SettingsNavigationRow
+-          label="Text and layout"
++          label="Texte et mise en page"
+           onPress={() => router.push("/dashboard/settings/reader-settings")}
+         />
+         <SettingsSeparator />
+         <SettingsNavigationRow
+-          label="Reader toolbar"
++          label="Barre d’outils du lecteur"
+           onPress={() => router.push("/dashboard/settings/toolbar-settings")}
+         />
+       </SettingsGroup>
+ 
+-      <SettingsGroup header="Behavior">
++      <SettingsGroup header="Comportement">
+         <SettingsToggleRow
+           disabled={isLoading}
+-          label="Keep screen awake"
++          label="Garder l’écran allumé"
+           onValueChange={(keepScreenOnWhileReading) =>
+             setSettings({ ...settings, keepScreenOnWhileReading })
+           }
+diff --git a/apps/mobile/app/dashboard/settings/theme.tsx b/apps/mobile/app/dashboard/settings/theme.tsx
+index 4d16500..4914ff3 100644
+--- a/apps/mobile/app/dashboard/settings/theme.tsx
++++ b/apps/mobile/app/dashboard/settings/theme.tsx
+@@ -21,9 +21,9 @@ export default function ThemePage() {
+             <SettingsChoiceRow
+               label={
+                 {
+-                  dark: "Dark Mode",
+-                  light: "Light Mode",
+-                  system: "System",
++                  dark: "Mode sombre",
++                  light: "Mode clair",
++                  system: "Système",
+                 }[theme]
+               }
+               onPress={() => setSettings({ ...settings, theme })}
+diff --git a/apps/mobile/app/dashboard/settings/toolbar-settings.tsx b/apps/mobile/app/dashboard/settings/toolbar-settings.tsx
+index b8fdc78..860daa6 100644
+--- a/apps/mobile/app/dashboard/settings/toolbar-settings.tsx
++++ b/apps/mobile/app/dashboard/settings/toolbar-settings.tsx
+@@ -166,7 +166,7 @@ export default function ToolbarSettingsPage() {
+ 
+   return (
+     <SettingsScreen>
+-      <SettingsGroup header={`Visible actions (max ${MAX_VISIBLE})`}>
++      <SettingsGroup header={`Actions visibles (max ${MAX_VISIBLE})`}>
+         {visible.length === 0 ? (
+           <View className="px-4 py-3">
+             <Text className="text-sm text-muted-foreground">
+@@ -185,7 +185,7 @@ export default function ToolbarSettingsPage() {
+         )}
+       </SettingsGroup>
+ 
+-      <SettingsGroup header="Overflow actions">
++      <SettingsGroup header="Autres actions">
+         {overflow.length === 0 ? (
+           <View className="px-4 py-3">
+             <Text className="text-sm text-muted-foreground">
+@@ -207,7 +207,7 @@ export default function ToolbarSettingsPage() {
+       <SettingsGroup>
+         <SettingsActionRow
+           centered
+-          label="Reset to Defaults"
++          label="Rétablir les valeurs par défaut"
+           onPress={resetToDefaults}
+           tone="primary"
+         />
+diff --git a/apps/mobile/app/dashboard/settings/uploads.tsx b/apps/mobile/app/dashboard/settings/uploads.tsx
+index 35f536d..099f9c2 100644
+--- a/apps/mobile/app/dashboard/settings/uploads.tsx
++++ b/apps/mobile/app/dashboard/settings/uploads.tsx
+@@ -18,8 +18,8 @@ export default function UploadSettings() {
+   return (
+     <SettingsScreen>
+       <SettingsGroup
+-        header="Image quality"
+-        footer="This controls image compression when adding an image bookmark."
++        header="Qualité des images"
++        footer="Règle la compression des images lors de l’ajout d’un marque-page image."
+       >
+         {UPLOAD_QUALITY_OPTIONS.map((option, index) => {
+           const isSelected = selectedLabel === option.label;
+diff --git a/apps/mobile/app/dashboard/tags/[slug].tsx b/apps/mobile/app/dashboard/tags/[slug].tsx
+index 6d99f7d..49646f1 100644
+--- a/apps/mobile/app/dashboard/tags/[slug].tsx
++++ b/apps/mobile/app/dashboard/tags/[slug].tsx
+@@ -35,7 +35,7 @@ export default function TagView() {
+       <Stack.Screen
+         options={{
+           headerTitle: tag?.name ?? "",
+-          headerBackTitle: "Back",
++          headerBackTitle: "Retour",
+           headerRight: () =>
+             tag ? <TagActionsMenu tagId={tag.id} tagName={tag.name} /> : null,
+         }}
+@@ -70,7 +70,7 @@ function TagActionsMenu({
+   const { mutate: deleteTag } = useDeleteTag({
+     onSuccess: () => {
+       router.dismissTo("/dashboard/(tabs)/(tags)");
+-      toast({ message: `Tag "${tagName}" deleted`, variant: "success" });
++      toast({ message: `Tag « ${tagName} » supprimé`, variant: "success" });
+     },
+     onError: (error) => {
+       toast({ message: error.message, variant: "destructive" });
+@@ -79,12 +79,12 @@ function TagActionsMenu({
+ 
+   const handleDelete = () => {
+     Alert.alert(
+-      "Delete Tag",
+-      `Are you sure you want to delete the tag "${tagName}"?`,
++      "Supprimer le tag",
++      `Voulez-vous vraiment supprimer le tag « ${tagName} » ?`,
+       [
+-        { text: "Cancel", style: "cancel" },
++        { text: "Annuler", style: "cancel" },
+         {
+-          text: "Delete",
++          text: "Supprimer",
+           onPress: () => deleteTag({ tagId }),
+           style: "destructive",
+         },
+@@ -104,13 +104,13 @@ function TagActionsMenu({
+       actions={[
+         {
+           id: "edit",
+-          title: "Edit Tag",
++          title: "Modifier le tag",
+           image: Platform.select({ ios: "square.and.pencil" }),
+           imageColor: Platform.select({ ios: menuIconColor }),
+         },
+         {
+           id: "delete_tag",
+-          title: "Delete Tag",
++          title: "Supprimer le tag",
+           attributes: { destructive: true },
+           image: Platform.select({ ios: "trash" }),
+           imageColor: Platform.select({ ios: destructiveMenuIconColor }),
+diff --git a/apps/mobile/app/dashboard/tags/[slug]/edit.tsx b/apps/mobile/app/dashboard/tags/[slug]/edit.tsx
+index 4814d0c..38c1c3e 100644
+--- a/apps/mobile/app/dashboard/tags/[slug]/edit.tsx
++++ b/apps/mobile/app/dashboard/tags/[slug]/edit.tsx
+@@ -31,7 +31,7 @@ export default function EditTagPage() {
+   } = useQuery(api.tags.get.queryOptions({ tagId }));
+   const { mutate: updateTag, isPending } = useUpdateTag({
+     onSuccess: () => {
+-      toast({ message: "Tag updated", variant: "success" });
++      toast({ message: "Tag mis à jour", variant: "success" });
+       router.back();
+     },
+     onError: (mutationError) => {
+@@ -41,7 +41,7 @@ export default function EditTagPage() {
+             .join("\n")
+         : mutationError.message;
+       toast({
+-        message: message || "Something went wrong",
++        message: message || "Une erreur s’est produite",
+         variant: "destructive",
+       });
+     },
+@@ -56,7 +56,7 @@ export default function EditTagPage() {
+   const onSubmit = () => {
+     const trimmedName = name.trim();
+     if (!trimmedName) {
+-      toast({ message: "Tag name can't be empty", variant: "destructive" });
++      toast({ message: "Le nom du tag ne peut pas être vide", variant: "destructive" });
+       return;
+     }
+ 
+@@ -78,20 +78,20 @@ export default function EditTagPage() {
+       contentContainerClassName="gap-4 px-4 pb-8"
+     >
+       <Input
+-        label="Tag Name"
++        label="Nom du tag"
+         labelClasses="text-sm text-muted-foreground"
+         inputClasses="bg-card"
+         onChangeText={setName}
+         onSubmitEditing={onSubmit}
+         value={name}
+-        placeholder="Reading"
++        placeholder="Lecture"
+         autoFocus
+         autoCapitalize="sentences"
+         returnKeyType="done"
+       />
+ 
+       <Button disabled={isPending} onPress={onSubmit}>
+-        <Text>Save</Text>
++        <Text>Enregistrer</Text>
+       </Button>
+     </ScrollView>
+   );
+diff --git a/apps/mobile/app/dashboard/tags/new.tsx b/apps/mobile/app/dashboard/tags/new.tsx
+index edb2bcf..0a3d73f 100644
+--- a/apps/mobile/app/dashboard/tags/new.tsx
++++ b/apps/mobile/app/dashboard/tags/new.tsx
+@@ -13,7 +13,7 @@ export default function NewTagPage() {
+   const { toast } = useToast();
+   const { mutate: createTag, isPending } = useCreateTag({
+     onSuccess: () => {
+-      toast({ message: "Tag created", variant: "success" });
++      toast({ message: "Tag créé", variant: "success" });
+       router.back();
+     },
+     onError: (error) => {
+@@ -21,7 +21,7 @@ export default function NewTagPage() {
+         ? Object.values(error.data.zodError.fieldErrors).flat().join("\n")
+         : error.message;
+       toast({
+-        message: message || "Something went wrong",
++        message: message || "Une erreur s’est produite",
+         variant: "destructive",
+       });
+     },
+@@ -30,7 +30,7 @@ export default function NewTagPage() {
+   const onSubmit = () => {
+     const trimmedName = name.trim();
+     if (!trimmedName) {
+-      toast({ message: "Tag name can't be empty", variant: "destructive" });
++      toast({ message: "Le nom du tag ne peut pas être vide", variant: "destructive" });
+       return;
+     }
+ 
+@@ -44,20 +44,20 @@ export default function NewTagPage() {
+       contentContainerClassName="gap-4 px-4 pb-8"
+     >
+       <Input
+-        label="Tag Name"
++        label="Nom du tag"
+         labelClasses="text-sm text-muted-foreground"
+         inputClasses="bg-card"
+         onChangeText={setName}
+         onSubmitEditing={onSubmit}
+         value={name}
+-        placeholder="Reading"
++        placeholder="Lecture"
+         autoFocus
+         autoCapitalize="sentences"
+         returnKeyType="done"
+       />
+ 
+       <Button disabled={isPending} onPress={onSubmit}>
+-        <Text>Save</Text>
++        <Text>Enregistrer</Text>
+       </Button>
+     </ScrollView>
+   );
+diff --git a/apps/mobile/app/error.tsx b/apps/mobile/app/error.tsx
+index 6e97530..c45d29c 100644
+--- a/apps/mobile/app/error.tsx
++++ b/apps/mobile/app/error.tsx
+@@ -4,7 +4,7 @@ import { Text } from "@/components/ui/Text";
+ export default function ErrorPage() {
+   return (
+     <View className="flex-1 items-center justify-center gap-4">
+-      <Text variant="largeTitle">Error!</Text>
++      <Text variant="largeTitle">Erreur !</Text>
+     </View>
+   );
+ }
+diff --git a/apps/mobile/app/server-address.tsx b/apps/mobile/app/server-address.tsx
+index c7b0508..4e64a27 100644
+--- a/apps/mobile/app/server-address.tsx
++++ b/apps/mobile/app/server-address.tsx
+@@ -57,12 +57,12 @@ export default function ServerAddress() {
+   const handleSave = () => {
+     // Validate the address
+     if (!address.trim()) {
+-      setError("Server address is required");
++      setError("L’adresse du serveur est obligatoire");
+       return;
+     }
+ 
+     if (!address.startsWith("http://") && !address.startsWith("https://")) {
+-      setError("Server address must start with http:// or https://");
++      setError("L’adresse du serveur doit commencer par http:// ou https://");
+       return;
+     }
+ 
+@@ -187,16 +187,16 @@ export default function ServerAddress() {
+ 
+           {/* Add New Header Form */}
+           <View className="gap-2 border-t border-border pt-4">
+-            <Text className="text-sm font-medium">Add New Header</Text>
++            <Text className="text-sm font-medium">Ajouter un nouvel en-tête</Text>
+             <Input
+-              placeholder="Header Name (e.g., X-Custom-Header)"
++              placeholder="Nom de l’en-tête (ex. X-Custom-Header)"
+               value={newHeaderKey}
+               onChangeText={setNewHeaderKey}
+               autoCapitalize="none"
+               inputClasses="bg-background"
+             />
+             <Input
+-              placeholder="Header Value"
++              placeholder="Valeur de l’en-tête"
+               value={newHeaderValue}
+               onChangeText={setNewHeaderValue}
+               autoCapitalize="none"
+@@ -208,13 +208,13 @@ export default function ServerAddress() {
+               disabled={!newHeaderKey.trim() || !newHeaderValue.trim()}
+             >
+               <Plus size={16} color={iconColor} />
+-              <Text className="text-sm">Add Header</Text>
++              <Text className="text-sm">Ajouter l’en-tête</Text>
+             </Button>
+           </View>
+         </View>
+       </View>
+       <Pressable onPress={handleSave} className="w-full items-center">
+-        <Text className="font-semibold text-primary">Save</Text>
++        <Text className="font-semibold text-primary">Enregistrer</Text>
+       </Pressable>
+     </KeyboardAwareScrollView>
+   );
+diff --git a/apps/mobile/app/sharing.tsx b/apps/mobile/app/sharing.tsx
+index 2c28804..4a2e97e 100644
+--- a/apps/mobile/app/sharing.tsx
++++ b/apps/mobile/app/sharing.tsx
+@@ -176,7 +176,7 @@ export default function Sharing() {
+                 onPress={handleDismiss}
+                 className="px-4 py-2 active:opacity-60"
+               >
+-                <Text className="text-muted-foreground">Dismiss</Text>
++                <Text className="text-muted-foreground">Ignorer</Text>
+               </Pressable>
+             </Animated.View>
+           )}
+@@ -196,7 +196,7 @@ export default function Sharing() {
+             className="items-center gap-2"
+           >
+             <Text variant="title1" className="font-semibold text-foreground">
+-              {mode.type === "alreadyExists" ? "Hoarded again!" : "Hoarded!"}
++              {mode.type === "alreadyExists" ? "Déjà enregistré !" : "Enregistré !"}
+             </Text>
+             <Text variant="body" className="text-muted-foreground">
+               Saved to your collection
+@@ -216,7 +216,7 @@ export default function Sharing() {
+               onPress={handleDismiss}
+               className="px-4 py-2 active:opacity-60"
+             >
+-              <Text className="text-muted-foreground">Dismiss</Text>
++              <Text className="text-muted-foreground">Ignorer</Text>
+             </Pressable>
+           </Animated.View>
+         </Animated.View>
+@@ -250,7 +250,7 @@ export default function Sharing() {
+               onPress={handleDismiss}
+               className="px-4 py-2 active:opacity-60"
+             >
+-              <Text className="text-muted-foreground">Dismiss</Text>
++              <Text className="text-muted-foreground">Ignorer</Text>
+             </Pressable>
+           </Animated.View>
+         </Animated.View>
+diff --git a/apps/mobile/app/signin.tsx b/apps/mobile/app/signin.tsx
+index 0503712..0be0c5f 100644
+--- a/apps/mobile/app/signin.tsx
++++ b/apps/mobile/app/signin.tsx
+@@ -83,7 +83,7 @@ export default function Signin() {
+           setSettings({ ...settings, apiKey: resp.key, apiKeyId: resp.id });
+         },
+         onError: (e) => {
+-          setError(getLoginErrorMessage(e, "Wrong username or password"));
++          setError(getLoginErrorMessage(e, "Identifiant ou mot de passe incorrect"));
+         },
+       }),
+     );
+@@ -96,7 +96,7 @@ export default function Signin() {
+           setSettings({ ...settings, apiKey: apiKey });
+         },
+         onError: (e) => {
+-          setError(getLoginErrorMessage(e, "Invalid API key"));
++          setError(getLoginErrorMessage(e, "Clé API invalide"));
+         },
+       }),
+     );
+@@ -117,7 +117,7 @@ export default function Signin() {
+ 
+   const onSignin = () => {
+     if (!settings.address) {
+-      setError("Server address is required");
++      setError("L’adresse du serveur est obligatoire");
+       return;
+     }
+ 
+@@ -125,7 +125,7 @@ export default function Signin() {
+       !settings.address.startsWith("http://") &&
+       !settings.address.startsWith("https://")
+     ) {
+-      setError("Server address must start with http:// or https://");
++      setError("L’adresse du serveur doit commencer par http:// ou https://");
+       return;
+     }
+ 
+@@ -186,7 +186,7 @@ export default function Signin() {
+               <>
+                 <RowSeparator />
+                 <FieldRow
+-                  label="Email"
++                  label="E-mail"
+                   placeholder="you@example.com"
+                   keyboardType="email-address"
+                   autoCapitalize="none"
+@@ -202,8 +202,8 @@ export default function Signin() {
+                 <RowSeparator />
+                 <FieldRow
+                   ref={passwordInputRef}
+-                  label="Password"
+-                  placeholder="Enter your password"
++                  label="Mot de passe"
++                  placeholder="Saisissez votre mot de passe"
+                   secureTextEntry
+                   autoCapitalize="none"
+                   autoComplete="current-password"
+@@ -218,8 +218,8 @@ export default function Signin() {
+               <>
+                 <RowSeparator />
+                 <FieldRow
+-                  label="API Key"
+-                  placeholder="Paste your key"
++                  label="Clé API"
++                  placeholder="Collez votre clé"
+                   secureTextEntry
+                   autoCapitalize="none"
+                   autoCorrect={false}
+@@ -252,7 +252,7 @@ export default function Signin() {
+             disabled={isPending}
+           >
+             {isPending && <ActivityIndicator size="small" color="white" />}
+-            <Text>{isPending ? "Signing in…" : "Sign In"}</Text>
++            <Text>{isPending ? "Connexion…" : "Se connecter"}</Text>
+           </Button>
+         </View>
+ 
+@@ -297,8 +297,8 @@ export default function Signin() {
+           >
+             <Text className="text-sm text-muted-foreground">
+               {loginType === LoginType.Password
+-                ? "Use an API key instead"
+-                : "Use your password instead"}
++                ? "Utiliser une clé API à la place"
++                : "Utiliser votre mot de passe à la place"}
+             </Text>
+           </Pressable>
+           <Pressable
+diff --git a/apps/mobile/app/test-connection.tsx b/apps/mobile/app/test-connection.tsx
+index cecf69b..76c0d25 100644
+--- a/apps/mobile/app/test-connection.tsx
++++ b/apps/mobile/app/test-connection.tsx
+@@ -24,7 +24,7 @@ export default function TestConnection() {
+       return;
+     }
+     setStatus("running");
+-    appendText("Running connection test ...");
++    appendText("Test de connexion en cours ...");
+     function runTest() {
+       const request = new XMLHttpRequest();
+       request.onreadystatechange = () => {
+@@ -33,14 +33,14 @@ export default function TestConnection() {
+         }
+ 
+         if (request.status === 0) {
+-          appendText("Network connection failed: " + request.responseText);
++          appendText("Échec de la connexion réseau : " + request.responseText);
+           setStatus("error");
+           return;
+         }
+ 
+         if (request.status !== 200) {
+-          appendText("Recieve non success error code: " + request.status);
+-          appendText("Got the following response:");
++          appendText("Code d’erreur reçu : " + request.status);
++          appendText("Réponse obtenue :");
+           appendText(request.responseText);
+           setStatus("error");
+           return;
+@@ -51,22 +51,22 @@ export default function TestConnection() {
+           });
+           const data = schema.parse(JSON.parse(request.responseText));
+           if (data.status !== "ok") {
+-            appendText(`Server is not healthy: ${data.status}`);
++            appendText(`Le serveur n’est pas en bon état : ${data.status}`);
+             setStatus("error");
+             return;
+           }
+           appendText("ALL GOOD");
+           setStatus("success");
+         } catch (e) {
+-          appendText(`Failed to parse response as JSON: ${e}`);
+-          appendText("Got the following response:");
++          appendText(`Impossible de lire la réponse JSON : ${e}`);
++          appendText("Réponse obtenue :");
+           appendText(request.responseText);
+           setStatus("error");
+           return;
+         }
+       };
+ 
+-      appendText("Using address: " + settings.address);
++      appendText("Adresse utilisée : " + settings.address);
+       request.open("GET", `${settings.address}/api/health`);
+       const headers = buildApiHeaders(settings.apiKey, settings.customHeaders);
+       Object.entries(headers).forEach(([key, value]) => {
+@@ -88,7 +88,7 @@ export default function TestConnection() {
+           await Clipboard.setStringAsync(text);
+         }}
+       >
+-        <Text>Copy Diagnostics Result</Text>
++        <Text>Copier le résultat du diagnostic</Text>
+       </Button>
+       <Button
+         className="w-full"
+@@ -98,7 +98,7 @@ export default function TestConnection() {
+           setRandomId(Math.random());
+         }}
+       >
+-        <Text>Retry</Text>
++        <Text>Réessayer</Text>
+       </Button>
+       <View
+         className={cn(
+@@ -116,9 +116,9 @@ export default function TestConnection() {
+             status === "error" && "text-white",
+           )}
+         >
+-          {status === "running" && "Running connection test ..."}
+-          {status === "success" && "Connection test successful"}
+-          {status === "error" && "Connection test failed"}
++          {status === "running" && "Test de connexion en cours ..."}
++          {status === "success" && "Test de connexion réussi"}
++          {status === "error" && "Échec du test de connexion"}
+         </Text>
+       </View>
+       <ScrollView className="border-1 border-md h-64 flex-1 border-border bg-input p-2 leading-6">
+diff --git a/apps/mobile/components/CustomHeadersModal.tsx b/apps/mobile/components/CustomHeadersModal.tsx
+index 6d022eb..57ca635 100644
+--- a/apps/mobile/components/CustomHeadersModal.tsx
++++ b/apps/mobile/components/CustomHeadersModal.tsx
+@@ -102,7 +102,7 @@ export function CustomHeadersModal({
+           >
+             {/* Header */}
+             <View className="mb-4 flex flex-row items-center justify-between">
+-              <Text className="text-lg font-semibold">Custom Headers</Text>
++              <Text className="text-lg font-semibold">En-têtes personnalisés</Text>
+               <Pressable onPress={handleCancel} className="p-2">
+                 <X size={24} color={iconColor} />
+               </Pressable>
+@@ -150,16 +150,16 @@ export function CustomHeadersModal({
+ 
+             {/* Add New Header */}
+             <View className="gap-2 border-t border-border pt-4">
+-              <Text className="text-sm font-semibold">Add New Header</Text>
++              <Text className="text-sm font-semibold">Ajouter un nouvel en-tête</Text>
+               <Input
+-                placeholder="Header Name (e.g., X-Custom-Header)"
++                placeholder="Nom de l’en-tête (ex. X-Custom-Header)"
+                 value={newHeaderKey}
+                 onChangeText={setNewHeaderKey}
+                 autoCapitalize="none"
+                 inputClasses="bg-background"
+               />
+               <Input
+-                placeholder="Header Value"
++                placeholder="Valeur de l’en-tête"
+                 value={newHeaderValue}
+                 onChangeText={setNewHeaderValue}
+                 autoCapitalize="none"
+@@ -171,7 +171,7 @@ export function CustomHeadersModal({
+                 disabled={!newHeaderKey.trim() || !newHeaderValue.trim()}
+               >
+                 <Plus size={16} color={iconColor} />
+-                <Text className="text-sm">Add Header</Text>
++                <Text className="text-sm">Ajouter l’en-tête</Text>
+               </Button>
+             </View>
+ 
+@@ -182,14 +182,14 @@ export function CustomHeadersModal({
+                 onPress={handleCancel}
+                 androidRootClassName="flex-1"
+               >
+-                <Text>Cancel</Text>
++                <Text>Annuler</Text>
+               </Button>
+               <Button
+                 variant="primary"
+                 onPress={handleSave}
+                 androidRootClassName="flex-1"
+               >
+-                <Text>Save</Text>
++                <Text>Enregistrer</Text>
+               </Button>
+             </View>
+           </KeyboardAwareScrollView>
+diff --git a/apps/mobile/components/FullPageError.tsx b/apps/mobile/components/FullPageError.tsx
+index 4823ed5..360d97d 100644
+--- a/apps/mobile/components/FullPageError.tsx
++++ b/apps/mobile/components/FullPageError.tsx
+@@ -9,7 +9,7 @@ import { Button } from "./ui/Button";
+ export default function FullPageError({
+   error,
+   onRetry,
+-  title = "Couldn't load this page",
++  title = "Impossible de charger cette page",
+   icon: Icon = CircleAlert,
+   detail,
+ }: {
+@@ -47,7 +47,7 @@ export default function FullPageError({
+           size={Platform.OS === "android" ? "sm" : "md"}
+           onPress={onRetry}
+         >
+-          <Text>Try again</Text>
++          <Text>Réessayer</Text>
+         </Button>
+       </View>
+     </View>
+diff --git a/apps/mobile/components/QueryPageState.tsx b/apps/mobile/components/QueryPageState.tsx
+index 56a1c98..3c62c78 100644
+--- a/apps/mobile/components/QueryPageState.tsx
++++ b/apps/mobile/components/QueryPageState.tsx
+@@ -16,8 +16,8 @@ export default function QueryPageState({
+     return (
+       <FullPageError
+         icon={WifiOff}
+-        title="You're offline"
+-        error="This page isn't available while you're offline. Reconnect to load it."
++        title="Vous êtes hors ligne"
++        error="Cette page n’est pas disponible hors ligne. Reconnectez-vous pour la charger."
+         detail={error?.message}
+         onRetry={onRetry}
+       />
+@@ -28,8 +28,8 @@ export default function QueryPageState({
+     return (
+       <FullPageError
+         icon={CloudOff}
+-        title="Karakeep is unavailable"
+-        error="Karakeep couldn't be reached. Try again in a moment."
++        title="Karakeep est indisponible"
++        error="Impossible de joindre Karakeep. Réessayez dans un instant."
+         detail={error?.message}
+         onRetry={onRetry}
+       />
+diff --git a/apps/mobile/components/bookmarks/AttachmentBox.tsx b/apps/mobile/components/bookmarks/AttachmentBox.tsx
+index a46a316..d112185 100644
+--- a/apps/mobile/components/bookmarks/AttachmentBox.tsx
++++ b/apps/mobile/components/bookmarks/AttachmentBox.tsx
+@@ -59,7 +59,7 @@ export default function AttachmentBox({ bookmark }: { bookmark: ZBookmark }) {
+         message:
+           error instanceof Error
+             ? error.message
+-            : "Failed to download attachment",
++            : "Échec du téléchargement de la pièce jointe",
+         variant: "destructive",
+         showProgress: false,
+       });
+@@ -70,7 +70,7 @@ export default function AttachmentBox({ bookmark }: { bookmark: ZBookmark }) {
+   };
+ 
+   return (
+-    <GroupedSection header="Attachments">
++    <GroupedSection header="Pièces jointes">
+       {assets.length === 0 ? (
+         <Text color="tertiary" className="px-4 py-3">
+           No attachments
+@@ -89,8 +89,8 @@ export default function AttachmentBox({ bookmark }: { bookmark: ZBookmark }) {
+                 {index > 0 && <RowSeparator />}
+                 <Pressable
+                   accessibilityRole="button"
+-                  accessibilityLabel={`Download ${name}`}
+-                  accessibilityHint="Opens options to save or share this attachment"
++                  accessibilityLabel={`Télécharger ${name}`}
++                  accessibilityHint="Ouvre les options pour enregistrer ou partager cette pièce jointe"
+                   accessibilityState={{
+                     disabled: downloadingId !== null,
+                     busy: isDownloading,
+diff --git a/apps/mobile/components/bookmarks/BookmarkCard.tsx b/apps/mobile/components/bookmarks/BookmarkCard.tsx
+index 2787f53..b9fd2dd 100644
+--- a/apps/mobile/components/bookmarks/BookmarkCard.tsx
++++ b/apps/mobile/components/bookmarks/BookmarkCard.tsx
+@@ -28,7 +28,7 @@ import TagList from "./card/TagList";
+ import ActionBar from "./card/ActionBar";
+ import { useBookmarkActions } from "./card/use-bookmark-actions";
+ 
+-const UNTITLED_BOOKMARK_TITLE = "Untitled";
++const UNTITLED_BOOKMARK_TITLE = "Sans titre";
+ 
+ function getDisplayTitle(bookmark: ZBookmark) {
+   return getBookmarkTitle(bookmark)?.trim() || UNTITLED_BOOKMARK_TITLE;
+@@ -311,7 +311,7 @@ export default function BookmarkCard({
+     ) {
+       void Linking.openURL(bookmark.content.url).catch(() => {
+         toast({
+-          message: "Failed to open link",
++          message: "Impossible d’ouvrir le lien",
+           variant: "destructive",
+           showProgress: false,
+         });
+diff --git a/apps/mobile/components/bookmarks/BookmarkLinkPreview.tsx b/apps/mobile/components/bookmarks/BookmarkLinkPreview.tsx
+index 06d07fa..254ed06 100644
+--- a/apps/mobile/components/bookmarks/BookmarkLinkPreview.tsx
++++ b/apps/mobile/components/bookmarks/BookmarkLinkPreview.tsx
+@@ -93,7 +93,7 @@ export function BookmarkLinkPdfPreview({ bookmark }: { bookmark: ZBookmark }) {
+   if (!asset) {
+     return (
+       <View className="flex-1 bg-background">
+-        <Text>Asset has no PDF</Text>
++        <Text>Cet élément n’a pas de PDF</Text>
+       </View>
+     );
+   }
+@@ -215,8 +215,8 @@ export function BookmarkLinkReaderPreview({
+           <BookOpen size={16} className="text-muted-foreground" />
+           <Text className="flex-1 text-sm text-muted-foreground">
+             {bannerPercent && bannerPercent > 0
+-              ? `Continue where you left off (${bannerPercent}%)`
+-              : "Continue where you left off"}
++              ? `Reprendre là où vous en étiez (${bannerPercent} %)`
++              : "Reprendre là où vous en étiez"}
+           </Text>
+           <TouchableOpacity
+             onPress={onContinue}
+@@ -301,7 +301,7 @@ export function BookmarkLinkArchivePreview({
+   if (!asset) {
+     return (
+       <View className="flex-1 bg-background">
+-        <Text>Asset has no offline archive</Text>
++        <Text>Cet élément n’a pas d’archive hors ligne</Text>
+       </View>
+     );
+   }
+@@ -336,7 +336,7 @@ export function BookmarkLinkScreenshotPreview({
+   if (!asset) {
+     return (
+       <View className="flex-1 bg-background">
+-        <Text>Asset has no screenshot</Text>
++        <Text>Cet élément n’a pas de capture d’écran</Text>
+       </View>
+     );
+   }
+diff --git a/apps/mobile/components/bookmarks/BookmarkLinkTypeSelector.tsx b/apps/mobile/components/bookmarks/BookmarkLinkTypeSelector.tsx
+index 5fd0a7a..e2a9013 100644
+--- a/apps/mobile/components/bookmarks/BookmarkLinkTypeSelector.tsx
++++ b/apps/mobile/components/bookmarks/BookmarkLinkTypeSelector.tsx
+@@ -57,7 +57,7 @@ export default function BookmarkLinkTypeSelector({
+   const viewActions = [
+     {
+       id: "reader" as const,
+-      title: "Reader View",
++      title: "Mode lecture",
+       state: type === "reader" ? ("on" as const) : undefined,
+       image: Platform.select({
+         ios: "doc.text",
+@@ -68,7 +68,7 @@ export default function BookmarkLinkTypeSelector({
+     },
+     {
+       id: "browser" as const,
+-      title: "Browser",
++      title: "Navigateur",
+       state: type === "browser" ? ("on" as const) : undefined,
+       image: Platform.select({
+         ios: "safari",
+@@ -79,7 +79,7 @@ export default function BookmarkLinkTypeSelector({
+     },
+     {
+       id: "screenshot" as const,
+-      title: "Screenshot",
++      title: "Capture d’écran",
+       state: type === "screenshot" ? ("on" as const) : undefined,
+       image: Platform.select({
+         ios: "camera",
+@@ -90,7 +90,7 @@ export default function BookmarkLinkTypeSelector({
+     },
+     {
+       id: "archive" as const,
+-      title: "Archived Page",
++      title: "Page archivée",
+       state: type === "archive" ? ("on" as const) : undefined,
+       image: Platform.select({
+         ios: "tray.full",
+diff --git a/apps/mobile/components/bookmarks/BookmarkList.tsx b/apps/mobile/components/bookmarks/BookmarkList.tsx
+index 0c5325a..9c6675f 100644
+--- a/apps/mobile/components/bookmarks/BookmarkList.tsx
++++ b/apps/mobile/components/bookmarks/BookmarkList.tsx
+@@ -69,8 +69,8 @@ export default function BookmarkList({
+         ListEmptyComponent={
+           <EmptyState
+             icon={Bookmark}
+-            title="No Bookmarks"
+-            subtitle="Your saved bookmarks will appear here"
++            title="Aucun marque-page"
++            subtitle="Vos marque-pages enregistrés apparaîtront ici"
+           />
+         }
+         data={bookmarks}
+diff --git a/apps/mobile/components/bookmarks/BookmarkListHeader.tsx b/apps/mobile/components/bookmarks/BookmarkListHeader.tsx
+index c59bba2..b2d5e7d 100644
+--- a/apps/mobile/components/bookmarks/BookmarkListHeader.tsx
++++ b/apps/mobile/components/bookmarks/BookmarkListHeader.tsx
+@@ -16,14 +16,14 @@ function useBookmarkListLayoutMenu(): {
+   const layoutModeActions: MenuAction[] = [
+     {
+       id: "card",
+-      title: "Card",
++      title: "Carte",
+       state: settings.bookmarkLayout === "card" ? "on" : "off",
+       image: Platform.select({ ios: "rectangle.grid.1x2" }),
+       imageColor: Platform.select({ ios: menuIconColor }),
+     },
+     {
+       id: "list",
+-      title: "List",
++      title: "Liste",
+       state: settings.bookmarkLayout === "list" ? "on" : "off",
+       image: Platform.select({ ios: "list.bullet" }),
+       imageColor: Platform.select({ ios: menuIconColor }),
+@@ -31,7 +31,7 @@ function useBookmarkListLayoutMenu(): {
+   ];
+   const showNotesAction: MenuAction = {
+     id: "show_notes",
+-    title: "Show Notes",
++    title: "Afficher les notes",
+     state: settings.showNotes ? "on" : "off",
+     image: Platform.select({ ios: "note.text" }),
+     imageColor: Platform.select({ ios: menuIconColor }),
+@@ -40,7 +40,7 @@ function useBookmarkListLayoutMenu(): {
+   const layoutActions: MenuAction[] = [
+     {
+       id: "layout",
+-      title: "Layout",
++      title: "Disposition",
+       image: Platform.select({ ios: "rectangle.grid.1x2" }),
+       imageColor: Platform.select({ ios: menuIconColor }),
+       subactions: layoutModeActions,
+@@ -48,20 +48,20 @@ function useBookmarkListLayoutMenu(): {
+     showNotesAction,
+     {
+       id: "sort",
+-      title: "Sort",
++      title: "Trier",
+       image: Platform.select({ ios: "arrow.up.arrow.down" }),
+       imageColor: Platform.select({ ios: menuIconColor }),
+       subactions: [
+         {
+           id: "sort_desc",
+-          title: "Newest First",
++          title: "Plus récents d’abord",
+           state: settings.bookmarkSortOrder === "desc" ? "on" : "off",
+           image: Platform.select({ ios: "arrow.down" }),
+           imageColor: Platform.select({ ios: menuIconColor }),
+         },
+         {
+           id: "sort_asc",
+-          title: "Oldest First",
++          title: "Plus anciens d’abord",
+           state: settings.bookmarkSortOrder === "asc" ? "on" : "off",
+           image: Platform.select({ ios: "arrow.up" }),
+           imageColor: Platform.select({ ios: menuIconColor }),
+diff --git a/apps/mobile/components/bookmarks/BookmarkTextView.tsx b/apps/mobile/components/bookmarks/BookmarkTextView.tsx
+index 788606e..95db491 100644
+--- a/apps/mobile/components/bookmarks/BookmarkTextView.tsx
++++ b/apps/mobile/components/bookmarks/BookmarkTextView.tsx
+@@ -28,14 +28,14 @@ export default function BookmarkTextView({ bookmark }: BookmarkTextViewProps) {
+   const { mutate, isPending } = useUpdateBookmark({
+     onError: () => {
+       toast({
+-        message: "Something went wrong",
++        message: "Une erreur s’est produite",
+         variant: "destructive",
+       });
+     },
+     onSuccess: () => {
+       setIsEditing(false);
+       toast({
+-        message: "Text updated successfully",
++        message: "Texte mis à jour",
+         showProgress: false,
+       });
+     },
+@@ -67,10 +67,10 @@ export default function BookmarkTextView({ bookmark }: BookmarkTextViewProps) {
+             disabled={isPending}
+             variant="plain"
+           >
+-            <Text>Cancel</Text>
++            <Text>Annuler</Text>
+           </Button>
+           <Button size="sm" onPress={handleSave} disabled={isPending}>
+-            <Text>{isPending ? "Saving..." : "Save"}</Text>
++            <Text>{isPending ? "Enregistrement..." : "Save"}</Text>
+           </Button>
+         </View>
+ 
+@@ -80,7 +80,7 @@ export default function BookmarkTextView({ bookmark }: BookmarkTextViewProps) {
+           multiline
+           autoFocus
+           editable={!isPending}
+-          placeholder="Enter your text here..."
++          placeholder="Saisissez votre texte ici..."
+           placeholderTextColor={colorScheme === "dark" ? "#666" : "#999"}
+           style={{
+             flex: 1,
+diff --git a/apps/mobile/components/bookmarks/BottomActions.tsx b/apps/mobile/components/bookmarks/BottomActions.tsx
+index b49004d..7ceb23a 100644
+--- a/apps/mobile/components/bookmarks/BottomActions.tsx
++++ b/apps/mobile/components/bookmarks/BottomActions.tsx
+@@ -53,45 +53,45 @@ export const TOOLBAR_ACTION_REGISTRY: Record<
+   ToolbarActionMeta
+ > = {
+   lists: {
+-    label: "Lists",
+-    render: () => "Lists",
++    label: "Listes",
++    render: () => "Listes",
+     Icon: ClipboardList,
+     sfSymbol: "list.bullet",
+   },
+   tags: { label: "Tags", render: () => "Tags", Icon: Tag, sfSymbol: "tag" },
+   info: {
+-    label: "Info",
+-    render: () => "Info",
++    label: "Infos",
++    render: () => "Infos",
+     Icon: Info,
+     sfSymbol: "info.circle",
+   },
+   favourite: {
+-    label: "Favourite",
+-    render: (b) => (b.favourited ? "Unfavourite" : "Favourite"),
++    label: "Favori",
++    render: (b) => (b.favourited ? "Retirer des favoris" : "Favori"),
+     Icon: Star,
+     sfSymbol: "star",
+   },
+   archive: {
+-    label: "Archive",
+-    render: (b) => (b.archived ? "Un-archive" : "Archive"),
++    label: "Archiver",
++    render: (b) => (b.archived ? "Désarchiver" : "Archiver"),
+     Icon: Archive,
+     sfSymbol: "archivebox",
+   },
+   browser: {
+-    label: "Open in Browser",
+-    render: () => "Open in Browser",
++    label: "Ouvrir dans le navigateur",
++    render: () => "Ouvrir dans le navigateur",
+     Icon: Globe,
+     sfSymbol: "safari",
+   },
+   share: {
+-    label: "Share",
+-    render: () => "Share",
++    label: "Partager",
++    render: () => "Partager",
+     Icon: ShareIcon,
+     sfSymbol: "square.and.arrow.up",
+   },
+   delete: {
+-    label: "Delete",
+-    render: () => "Delete",
++    label: "Supprimer",
++    render: () => "Supprimer",
+     Icon: Trash2,
+     sfSymbol: "trash",
+   },
+@@ -118,13 +118,13 @@ function useToolbarActions(bookmark: ZBookmark) {
+       onSuccess: () => {
+         router.back();
+         toast({
+-          message: "The bookmark has been deleted!",
++          message: "Le marque-page a été supprimé !",
+           showProgress: false,
+         });
+       },
+       onError: () => {
+         toast({
+-          message: "Something went wrong",
++          message: "Une erreur s’est produite",
+           variant: "destructive",
+           showProgress: false,
+         });
+@@ -135,7 +135,7 @@ function useToolbarActions(bookmark: ZBookmark) {
+     useUpdateBookmark({
+       onError: () => {
+         toast({
+-          message: "Something went wrong",
++          message: "Une erreur s’est produite",
+           variant: "destructive",
+           showProgress: false,
+         });
+@@ -147,13 +147,13 @@ function useToolbarActions(bookmark: ZBookmark) {
+       onSuccess: (resp) => {
+         router.back();
+         toast({
+-          message: `The bookmark has been ${resp.archived ? "archived" : "un-archived"}!`,
++          message: `Le marque-page a été ${resp.archived ? "archivé" : "désarchivé"} !`,
+           showProgress: false,
+         });
+       },
+       onError: () => {
+         toast({
+-          message: "Something went wrong",
++          message: "Une erreur s’est produite",
+           variant: "destructive",
+           showProgress: false,
+         });
+@@ -162,12 +162,12 @@ function useToolbarActions(bookmark: ZBookmark) {
+ 
+   const deleteBookmarkAlert = () =>
+     Alert.alert(
+-      "Delete bookmark?",
+-      "Are you sure you want to delete this bookmark?",
++      "Supprimer le marque-page ?",
++      "Voulez-vous vraiment supprimer ce marque-page ?",
+       [
+-        { text: "Cancel", style: "cancel" },
++        { text: "Annuler", style: "cancel" },
+         {
+-          text: "Delete",
++          text: "Supprimer",
+           onPress: () => deleteBookmark({ bookmarkId: bookmark.id }),
+           style: "destructive",
+         },
+@@ -252,7 +252,7 @@ function useToolbarActions(bookmark: ZBookmark) {
+         if (bookmark.content.type !== BookmarkTypes.LINK) return;
+         Linking.openURL(bookmark.content.url).catch(() => {
+           toast({
+-            message: "Failed to open link",
++            message: "Impossible d’ouvrir le lien",
+             variant: "destructive",
+             showProgress: false,
+           });
+@@ -397,7 +397,7 @@ export default function BottomActions({ bookmark }: BottomActionsProps) {
+       : []),
+     {
+       id: "edit-toolbar",
+-      title: "Edit Toolbar...",
++      title: "Modifier la barre d’outils...",
+       image: Platform.select({
+         ios: "slider.horizontal.3",
+         default: undefined,
+diff --git a/apps/mobile/components/bookmarks/NotePreview.tsx b/apps/mobile/components/bookmarks/NotePreview.tsx
+index 0283d17..c27121b 100644
+--- a/apps/mobile/components/bookmarks/NotePreview.tsx
++++ b/apps/mobile/components/bookmarks/NotePreview.tsx
+@@ -77,7 +77,7 @@ export function NotePreview({
+                     router.push(`/dashboard/bookmarks/${bookmarkId}/info`);
+                   }}
+                 >
+-                  <Text className="text-sm">Edit Notes</Text>
++                  <Text className="text-sm">Modifier les notes</Text>
+                   <ExternalLink size={14} color={modalIconColor} />
+                 </Button>
+               </View>
+diff --git a/apps/mobile/components/bookmarks/PDFViewer.tsx b/apps/mobile/components/bookmarks/PDFViewer.tsx
+index a45b45b..6849cbc 100644
+--- a/apps/mobile/components/bookmarks/PDFViewer.tsx
++++ b/apps/mobile/components/bookmarks/PDFViewer.tsx
+@@ -45,14 +45,14 @@ export function PDFViewer({ source, headers }: PDFViewerProps) {
+   // Merge download and render errors
+   const error = useMemo(() => {
+     if (downloadError) {
+-      let errorMessage = "Failed to download PDF";
++      let errorMessage = "Échec du téléchargement du PDF";
+       if (downloadError.message.includes("Network request failed")) {
+-        errorMessage = "Network error. Please check your connection.";
++        errorMessage = "Erreur réseau. Vérifiez votre connexion.";
+       } else if (
+         downloadError.message.includes("401") ||
+         downloadError.message.includes("403")
+       ) {
+-        errorMessage = "Authentication failed. Please sign in again.";
++        errorMessage = "Échec de l’authentification. Veuillez vous reconnecter.";
+       } else if (downloadError.message.includes("404")) {
+         errorMessage = "PDF not found.";
+       }
+@@ -104,7 +104,7 @@ export function PDFViewer({ source, headers }: PDFViewerProps) {
+         spacing={16}
+         maxScale={3}
+         onLoadComplete={() => ({})}
+-        onError={() => setPdfRenderError("Failed to render PDF")}
++        onError={() => setPdfRenderError("Impossible d’afficher le PDF")}
+         trustAllCerts={false}
+         renderActivityIndicator={() => (
+           <ActivityIndicator size="large" color={colors.foreground} />
+diff --git a/apps/mobile/components/bookmarks/card/use-bookmark-actions.ts b/apps/mobile/components/bookmarks/card/use-bookmark-actions.ts
+index 15a9b15..b85e407 100644
+--- a/apps/mobile/components/bookmarks/card/use-bookmark-actions.ts
++++ b/apps/mobile/components/bookmarks/card/use-bookmark-actions.ts
+@@ -39,7 +39,7 @@ export function useBookmarkActions(
+ 
+   const onError = () => {
+     toast({
+-      message: "Something went wrong",
++      message: "Une erreur s’est produite",
+       variant: "destructive",
+       showProgress: false,
+     });
+@@ -49,7 +49,7 @@ export function useBookmarkActions(
+     useDeleteBookmark({
+       onSuccess: () => {
+         toast({
+-          message: "The bookmark has been deleted!",
++          message: "Le marque-page a été supprimé !",
+           showProgress: false,
+         });
+       },
+@@ -64,7 +64,7 @@ export function useBookmarkActions(
+     useUpdateBookmark({
+       onSuccess: (response) => {
+         toast({
+-          message: `The bookmark has been ${response.archived ? "archived" : "un-archived"}!`,
++          message: `Le marque-page a été ${response.archived ? "archivé" : "désarchivé"} !`,
+           showProgress: false,
+         });
+       },
+@@ -86,12 +86,12 @@ export function useBookmarkActions(
+ 
+   const deleteBookmarkAlert = () =>
+     Alert.alert(
+-      "Delete bookmark?",
+-      "Are you sure you want to delete this bookmark?",
++      "Supprimer le marque-page ?",
++      "Voulez-vous vraiment supprimer ce marque-page ?",
+       [
+-        { text: "Cancel", style: "cancel" },
++        { text: "Annuler", style: "cancel" },
+         {
+-          text: "Delete",
++          text: "Supprimer",
+           onPress: () => deleteBookmark({ bookmarkId: bookmark.id }),
+           style: "destructive",
+         },
+@@ -103,25 +103,25 @@ export function useBookmarkActions(
+     menuActions.push(
+       {
+         id: "edit",
+-        title: "Edit",
++        title: "Modifier",
+         image: Platform.select({ ios: "pencil" }),
+         imageColor: Platform.select({ ios: menuIconColor }),
+       },
+       {
+         id: "manage_list",
+-        title: "Manage Lists",
++        title: "Gérer les listes",
+         image: Platform.select({ ios: "list.bullet" }),
+         imageColor: Platform.select({ ios: menuIconColor }),
+       },
+       {
+         id: "manage_tags",
+-        title: "Manage Tags",
++        title: "Gérer les tags",
+         image: Platform.select({ ios: "tag" }),
+         imageColor: Platform.select({ ios: menuIconColor }),
+       },
+       {
+         id: "archive",
+-        title: bookmark.archived ? "Un-archive" : "Archive",
++        title: bookmark.archived ? "Désarchiver" : "Archiver",
+         image: Platform.select({ ios: "archivebox" }),
+         imageColor: Platform.select({ ios: menuIconColor }),
+       },
+@@ -132,15 +132,15 @@ export function useBookmarkActions(
+     if (offlineAvailability.isAvailableOffline) {
+       menuActions.push({
+         id: "offline-group",
+-        title: "Available offline",
++        title: "Disponible hors ligne",
+         image: Platform.select({ ios: "checkmark.circle" }),
+         imageColor: Platform.select({ ios: menuIconColor }),
+         subactions: [
+           {
+             id: "update-offline-copy",
+             title: offlineAvailability.isSaving
+-              ? "Saving offline copy..."
+-              : "Update offline copy",
++              ? "Enregistrement de la copie hors ligne..."
++              : "Mettre à jour la copie hors ligne",
+             image: Platform.select({ ios: "arrow.clockwise" }),
+             imageColor: Platform.select({ ios: menuIconColor }),
+             attributes: {
+@@ -149,7 +149,7 @@ export function useBookmarkActions(
+           },
+           {
+             id: "remove-offline-copy",
+-            title: "Remove offline copy",
++            title: "Retirer la copie hors ligne",
+             attributes: { destructive: true },
+             image: Platform.select({ ios: "trash" }),
+             imageColor: Platform.select({ ios: destructiveMenuIconColor }),
+@@ -160,8 +160,8 @@ export function useBookmarkActions(
+       menuActions.push({
+         id: "make-available-offline",
+         title: offlineAvailability.isSaving
+-          ? "Saving offline copy..."
+-          : "Make available offline",
++          ? "Enregistrement de la copie hors ligne..."
++          : "Rendre disponible hors ligne",
+         image: Platform.select({ ios: "arrow.down.circle" }),
+         imageColor: Platform.select({ ios: menuIconColor }),
+         attributes: {
+@@ -174,7 +174,7 @@ export function useBookmarkActions(
+   if (isOwner) {
+     menuActions.push({
+       id: "delete",
+-      title: "Delete",
++      title: "Supprimer",
+       attributes: { destructive: true },
+       image: Platform.select({ ios: "trash" }),
+       imageColor: Platform.select({ ios: destructiveMenuIconColor }),
+diff --git a/apps/mobile/components/bookmarks/useOfflineAvailability.ts b/apps/mobile/components/bookmarks/useOfflineAvailability.ts
+index e54f096..366acd2 100644
+--- a/apps/mobile/components/bookmarks/useOfflineAvailability.ts
++++ b/apps/mobile/components/bookmarks/useOfflineAvailability.ts
+@@ -57,7 +57,7 @@ export function useOfflineAvailability(bookmarkId: string) {
+       });
+       toast({
+         message: isAvailableOffline
+-          ? "Offline copy updated"
++          ? "Copie hors ligne mise à jour"
+           : "Available offline",
+         variant: "success",
+       });
+@@ -66,7 +66,7 @@ export function useOfflineAvailability(bookmarkId: string) {
+         message:
+           error instanceof Error
+             ? error.message
+-            : "Could not save this article for offline reading.",
++            : "Impossible d’enregistrer cet article pour la lecture hors ligne.",
+         variant: "destructive",
+       });
+     } finally {
+@@ -76,16 +76,16 @@ export function useOfflineAvailability(bookmarkId: string) {
+ 
+   const confirmRemove = () => {
+     Alert.alert(
+-      "Remove offline copy?",
+-      "The article may remain temporarily cached, but it will no longer be kept for offline reading.",
++      "Retirer la copie hors ligne ?",
++      "L’article peut rester temporairement en cache, mais il ne sera plus conservé pour la lecture hors ligne.",
+       [
+-        { text: "Cancel", style: "cancel" },
++        { text: "Annuler", style: "cancel" },
+         {
+-          text: "Remove",
++          text: "Retirer",
+           style: "destructive",
+           onPress: () => {
+             removeOfflineArticle(scope, bookmarkId);
+-            toast({ message: "Offline copy removed" });
++            toast({ message: "Copie hors ligne supprimée" });
+           },
+         },
+       ],
+diff --git a/apps/mobile/components/highlights/HighlightCard.tsx b/apps/mobile/components/highlights/HighlightCard.tsx
+index ec4278c..00d3816 100644
+--- a/apps/mobile/components/highlights/HighlightCard.tsx
++++ b/apps/mobile/components/highlights/HighlightCard.tsx
+@@ -31,7 +31,7 @@ export default function HighlightCard({
+ 
+   const onError = () => {
+     toast({
+-      message: "Something went wrong",
++      message: "Une erreur s’est produite",
+       variant: "destructive",
+       showProgress: false,
+     });
+@@ -41,7 +41,7 @@ export default function HighlightCard({
+     {
+       onSuccess: () => {
+         toast({
+-          message: "Highlight has been deleted!",
++          message: "Le surlignage a été supprimé !",
+           showProgress: false,
+         });
+       },
+@@ -51,12 +51,12 @@ export default function HighlightCard({
+ 
+   const deleteHighlightAlert = () =>
+     Alert.alert(
+-      "Delete highlight?",
+-      "Are you sure you want to delete this highlight?",
++      "Supprimer le surlignage ?",
++      "Voulez-vous vraiment supprimer ce surlignage ?",
+       [
+-        { text: "Cancel", style: "cancel" },
++        { text: "Annuler", style: "cancel" },
+         {
+-          text: "Delete",
++          text: "Supprimer",
+           onPress: () => deleteHighlight({ highlightId: highlight.id }),
+           style: "destructive",
+         },
+@@ -91,7 +91,7 @@ export default function HighlightCard({
+           style={{ borderLeftColor: HIGHLIGHT_COLOR_MAP[highlight.color] }}
+         >
+           <Text className="italic text-foreground">
+-            {highlight.text || "No text available"}
++            {highlight.text || "Aucun texte disponible"}
+           </Text>
+         </View>
+ 
+diff --git a/apps/mobile/components/highlights/HighlightList.tsx b/apps/mobile/components/highlights/HighlightList.tsx
+index 9894409..03ed4f7 100644
+--- a/apps/mobile/components/highlights/HighlightList.tsx
++++ b/apps/mobile/components/highlights/HighlightList.tsx
+@@ -67,8 +67,8 @@ export default function HighlightList({
+         ListEmptyComponent={
+           <EmptyState
+             icon={Highlighter}
+-            title="No Highlights"
+-            subtitle="Highlights you create will appear here"
++            title="Aucun surlignage"
++            subtitle="Les surlignages que vous créez apparaîtront ici"
+           />
+         }
+         data={highlights}
+diff --git a/apps/mobile/components/lists/list-parent-field.tsx b/apps/mobile/components/lists/list-parent-field.tsx
+index cdcc7cf..a453787 100644
+--- a/apps/mobile/components/lists/list-parent-field.tsx
++++ b/apps/mobile/components/lists/list-parent-field.tsx
+@@ -18,19 +18,19 @@ export function ListParentField({
+   const selectedPath = value ? data?.getPathById(value) : undefined;
+   const selectedName =
+     value === null
+-      ? "No parent"
++      ? "Aucun parent"
+       : selectedPath
+         ? listNameFromPath(selectedPath)
+         : isPending
+-          ? "Loading..."
+-          : "Parent unavailable";
++          ? "Chargement..."
++          : "Parent indisponible";
+ 
+   return (
+     <View className="gap-2">
+-      <Text className="text-sm text-muted-foreground">Parent List</Text>
++      <Text className="text-sm text-muted-foreground">Liste parente</Text>
+       <Pressable
+-        accessibilityLabel={`Parent list: ${selectedName}`}
+-        accessibilityHint="Opens the parent list selection screen"
++        accessibilityLabel={`Liste parente : ${selectedName}`}
++        accessibilityHint="Ouvre l’écran de sélection de la liste parente"
+         accessibilityRole="button"
+         onPress={onPress}
+         className="min-h-11 flex-row items-center justify-between gap-3 rounded-xl border border-input bg-card px-4 py-3 active:opacity-70"
+diff --git a/apps/mobile/components/lists/list-sharing-settings.tsx b/apps/mobile/components/lists/list-sharing-settings.tsx
+index 442f162..5846084 100644
+--- a/apps/mobile/components/lists/list-sharing-settings.tsx
++++ b/apps/mobile/components/lists/list-sharing-settings.tsx
+@@ -38,7 +38,7 @@ function RolePicker({
+   role,
+   onChange,
+   disabled,
+-  label = "Permission",
++  label = "Autorisation",
+ }: {
+   role: Role;
+   onChange: (role: Role) => void;
+@@ -48,17 +48,17 @@ function RolePicker({
+   const { colors } = useColorScheme();
+   return (
+     <MenuView
+-      title="Permission"
++      title="Autorisation"
+       actions={[
+         {
+           id: "viewer",
+-          title: "Can view",
++          title: "Peut consulter",
+           state: role === "viewer" ? "on" : "off",
+           attributes: { disabled },
+         },
+         {
+           id: "editor",
+-          title: "Can edit",
++          title: "Peut modifier",
+           state: role === "editor" ? "on" : "off",
+           attributes: { disabled },
+         },
+@@ -74,12 +74,12 @@ function RolePicker({
+       <View
+         accessible
+         accessibilityRole="button"
+-        accessibilityLabel={`${label}: ${role === "viewer" ? "Can view" : "Can edit"}`}
++        accessibilityLabel={`${label} : ${role === "viewer" ? "Peut consulter" : "Peut modifier"}`}
+         accessibilityState={{ disabled }}
+         className="min-h-11 flex-row items-center gap-1.5"
+       >
+         <Text className="text-primary">
+-          {role === "viewer" ? "Can view" : "Can edit"}
++          {role === "viewer" ? "Peut consulter" : "Peut modifier"}
+         </Text>
+         <ChevronDown size={16} color={colors.primary} />
+       </View>
+@@ -106,7 +106,7 @@ function Person({
+         </Text>
+       </View>
+       <View className="flex-1 gap-0.5">
+-        <Text numberOfLines={1}>{name || email || "User"}</Text>
++        <Text numberOfLines={1}>{name || email || "Utilisateur"}</Text>
+         {email ? (
+           <Text variant="footnote" color="tertiary" numberOfLines={1}>
+             {email}
+@@ -170,7 +170,7 @@ export function ListSharingSettings({ list }: { list: ZBookmarkList }) {
+       onError,
+       onSuccess: async () => {
+         setEmail("");
+-        toast({ message: "Invitation sent", showProgress: false });
++        toast({ message: "Invitation envoyée", showProgress: false });
+         await invalidate();
+       },
+     }),
+@@ -203,7 +203,7 @@ export function ListSharingSettings({ list }: { list: ZBookmarkList }) {
+     const trimmedEmail = email.trim();
+     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+       toast({
+-        message: "Enter a valid email address",
++        message: "Saisissez une adresse e-mail valide",
+         variant: "destructive",
+         showProgress: false,
+       });
+@@ -216,7 +216,7 @@ export function ListSharingSettings({ list }: { list: ZBookmarkList }) {
+     try {
+       if (copy) {
+         await Clipboard.setStringAsync(publicUrl);
+-        toast({ message: "Public link copied", showProgress: false });
++        toast({ message: "Lien public copié", showProgress: false });
+       } else {
+         await Share.share(
+           Platform.OS === "ios" ? { url: publicUrl } : { message: publicUrl },
+@@ -224,7 +224,7 @@ export function ListSharingSettings({ list }: { list: ZBookmarkList }) {
+       }
+     } catch {
+       toast({
+-        message: "Failed to share link",
++        message: "Échec du partage du lien",
+         variant: "destructive",
+         showProgress: false,
+       });
+@@ -237,18 +237,18 @@ export function ListSharingSettings({ list }: { list: ZBookmarkList }) {
+         {list.name}
+       </Text>
+       {isOwner && (
+-        <GroupedSection header="Public access">
++        <GroupedSection header="Accès public">
+           <View className="flex-row items-center gap-3 px-4 py-3">
+             <Globe size={22} color={colors.grey} />
+             <View className="flex-1 gap-1">
+-              <Text>Public list</Text>
++              <Text>Liste publique</Text>
+               <Text variant="footnote" color="tertiary">
+                 Anyone with the link can view the bookmarks in this list.
+               </Text>
+             </View>
+             {editList.isPending ? <ActivityIndicator size="small" /> : null}
+             <Switch
+-              accessibilityLabel="Public list"
++              accessibilityLabel="Liste publique"
+               value={list.public}
+               disabled={editList.isPending || !config || !!config.demoMode}
+               onValueChange={(value) =>
+@@ -270,7 +270,7 @@ export function ListSharingSettings({ list }: { list: ZBookmarkList }) {
+                     className="min-h-11 flex-row items-center gap-2 pr-3 active:opacity-70"
+                   >
+                     <Copy size={18} color={colors.primary} />
+-                    <Text className="text-primary">Copy link</Text>
++                    <Text className="text-primary">Copier le lien</Text>
+                   </Pressable>
+                   <Pressable
+                     accessibilityRole="button"
+@@ -278,7 +278,7 @@ export function ListSharingSettings({ list }: { list: ZBookmarkList }) {
+                     className="min-h-11 flex-row items-center gap-2 px-3 active:opacity-70"
+                   >
+                     <Share2 size={18} color={colors.primary} />
+-                    <Text className="text-primary">Share link</Text>
++                    <Text className="text-primary">Partager le lien</Text>
+                   </Pressable>
+                 </View>
+               </View>
+@@ -288,11 +288,11 @@ export function ListSharingSettings({ list }: { list: ZBookmarkList }) {
+       )}
+ 
+       {isOwner && list.type === "manual" && (
+-        <GroupedSection header="Invite a collaborator">
++        <GroupedSection header="Inviter un collaborateur">
+           <View className="gap-3 p-4">
+             <Input
+-              accessibilityLabel="Collaborator email"
+-              placeholder="Email address"
++              accessibilityLabel="E-mail du collaborateur"
++              placeholder="Adresse e-mail"
+               value={email}
+               onChangeText={setEmail}
+               keyboardType="email-address"
+@@ -305,7 +305,7 @@ export function ListSharingSettings({ list }: { list: ZBookmarkList }) {
+               }}
+             />
+             <View className="flex-row items-center justify-between">
+-              <Text>Permission</Text>
++              <Text>Autorisation</Text>
+               <RolePicker
+                 role={role}
+                 onChange={setRole}
+@@ -314,8 +314,8 @@ export function ListSharingSettings({ list }: { list: ZBookmarkList }) {
+             </View>
+             <Text variant="footnote" color="tertiary">
+               {role === "viewer"
+-                ? "Can view bookmarks in this list."
+-                : "Can view, add, and remove bookmarks in this list."}
++                ? "Peut consulter les marque-pages de cette liste."
++                : "Peut consulter, ajouter et retirer des marque-pages dans cette liste."}
+             </Text>
+             <Button
+               onPress={sendInvitation}
+@@ -328,7 +328,7 @@ export function ListSharingSettings({ list }: { list: ZBookmarkList }) {
+                 <UserPlus size={18} color="white" />
+               )}
+               <Text>
+-                {invite.isPending ? "Inviting..." : "Send invitation"}
++                {invite.isPending ? "Invitation..." : "Envoyer l’invitation"}
+               </Text>
+             </Button>
+           </View>
+@@ -340,17 +340,17 @@ export function ListSharingSettings({ list }: { list: ZBookmarkList }) {
+         </Text>
+       )}
+ 
+-      <GroupedSection header="People with access">
++      <GroupedSection header="Personnes ayant accès">
+         {collaboratorsQuery.isPending ? (
+           <ActivityIndicator className="p-4" />
+         ) : collaboratorsQuery.error ? (
+           <View className="gap-3 p-4">
+-            <Text color="tertiary">Unable to load collaborators.</Text>
++            <Text color="tertiary">Impossible de charger les collaborateurs.</Text>
+             <Button
+               variant="plain"
+               onPress={() => void collaboratorsQuery.refetch()}
+             >
+-              <Text>Try again</Text>
++              <Text>Réessayer</Text>
+             </Button>
+           </View>
+         ) : collaborators ? (
+@@ -373,9 +373,9 @@ export function ListSharingSettings({ list }: { list: ZBookmarkList }) {
+                   email={person.user.email}
+                   subtitle={
+                     person.status === "pending"
+-                      ? "Invitation pending"
++                      ? "Invitation en attente"
+                       : person.status === "declined"
+-                        ? "Invitation declined"
++                        ? "Invitation refusée"
+                         : undefined
+                   }
+                 >
+@@ -383,7 +383,7 @@ export function ListSharingSettings({ list }: { list: ZBookmarkList }) {
+                     <RolePicker
+                       role={person.role}
+                       disabled={isUpdating}
+-                      label={`Permission for ${person.user.name}`}
++                      label={`Autorisation pour ${person.user.name}`}
+                       onChange={(role) =>
+                         updateRole.mutate({
+                           listId: list.id,
+@@ -394,7 +394,7 @@ export function ListSharingSettings({ list }: { list: ZBookmarkList }) {
+                     />
+                   ) : (
+                     <Text variant="footnote" color="tertiary">
+-                      {person.role === "viewer" ? "Can view" : "Can edit"}
++                      {person.role === "viewer" ? "Peut consulter" : "Peut modifier"}
+                     </Text>
+                   )}
+                   {isOwner && (
+@@ -406,18 +406,18 @@ export function ListSharingSettings({ list }: { list: ZBookmarkList }) {
+                       onPress={() =>
+                         Alert.alert(
+                           person.status === "accepted"
+-                            ? "Remove collaborator?"
+-                            : "Revoke invitation?",
++                            ? "Retirer le collaborateur ?"
++                            : "Révoquer l’invitation ?",
+                           person.status === "accepted"
+-                            ? `${person.user.name} will lose access. Bookmarks they added will be removed from this list.`
+-                            : `Revoke the invitation for ${person.user.name}?`,
++                            ? `${person.user.name} perdra l’accès. Les marque-pages qu’il a ajoutés seront retirés de cette liste.`
++                            : `Révoquer l’invitation de ${person.user.name} ?`,
+                           [
+-                            { text: "Cancel", style: "cancel" },
++                            { text: "Annuler", style: "cancel" },
+                             {
+                               text:
+                                 person.status === "accepted"
+-                                  ? "Remove"
+-                                  : "Revoke",
++                                  ? "Retirer"
++                                  : "Révoquer",
+                               style: "destructive",
+                               onPress: () =>
+                                 person.status === "accepted"
+diff --git a/apps/mobile/components/lists/pending-list-invitations.tsx b/apps/mobile/components/lists/pending-list-invitations.tsx
+index 4e241e2..cc9eba3 100644
+--- a/apps/mobile/components/lists/pending-list-invitations.tsx
++++ b/apps/mobile/components/lists/pending-list-invitations.tsx
+@@ -34,7 +34,7 @@ function InvitationRow({ invitation }: { invitation: Invitation }) {
+           queryClient.invalidateQueries(api.lists.list.pathFilter()),
+           queryClient.invalidateQueries(api.lists.stats.pathFilter()),
+         ]);
+-        toast({ message: "Invitation accepted", showProgress: false });
++        toast({ message: "Invitation acceptée", showProgress: false });
+       },
+     }),
+   );
+@@ -45,7 +45,7 @@ function InvitationRow({ invitation }: { invitation: Invitation }) {
+         await queryClient.invalidateQueries(
+           api.lists.getPendingInvitations.pathFilter(),
+         );
+-        toast({ message: "Invitation declined", showProgress: false });
++        toast({ message: "Invitation refusée", showProgress: false });
+       },
+     }),
+   );
+@@ -55,27 +55,27 @@ function InvitationRow({ invitation }: { invitation: Invitation }) {
+       <Text className="font-semibold">{invitation.list.name}</Text>
+       <Text variant="footnote" color="tertiary">
+         {invitation.list.owner
+-          ? `Invited by ${invitation.list.owner.name}. `
++          ? `Invité par ${invitation.list.owner.name}. `
+           : ""}
+         {invitation.role === "editor"
+-          ? "Can view, add, and remove bookmarks."
+-          : "Can view bookmarks."}
++          ? "Peut consulter, ajouter et retirer des marque-pages."
++          : "Peut consulter les marque-pages."}
+       </Text>
+       <View className="flex-row items-center gap-3">
+         <Button
+-          accessibilityLabel={`Accept invitation to ${invitation.list.name}`}
++          accessibilityLabel={`Accepter l’invitation à ${invitation.list.name}`}
+           disabled={busy}
+           onPress={() => accept.mutate({ invitationId: invitation.id })}
+         >
+-          <Text>Accept</Text>
++          <Text>Accepter</Text>
+         </Button>
+         <Button
+-          accessibilityLabel={`Decline invitation to ${invitation.list.name}`}
++          accessibilityLabel={`Refuser l’invitation à ${invitation.list.name}`}
+           variant="plain"
+           disabled={busy}
+           onPress={() => decline.mutate({ invitationId: invitation.id })}
+         >
+-          <Text>Decline</Text>
++          <Text>Refuser</Text>
+         </Button>
+         {busy && <ActivityIndicator size="small" />}
+       </View>
+@@ -91,7 +91,7 @@ export function PendingListInvitations() {
+   if (error) {
+     return (
+       <Button variant="plain" onPress={() => void refetch()}>
+-        <Text>Retry loading invitations</Text>
++        <Text>Réessayer de charger les invitations</Text>
+       </Button>
+     );
+   }
+diff --git a/apps/mobile/components/search/BookmarkSearchResults.tsx b/apps/mobile/components/search/BookmarkSearchResults.tsx
+index 89552a0..302b3a2 100644
+--- a/apps/mobile/components/search/BookmarkSearchResults.tsx
++++ b/apps/mobile/components/search/BookmarkSearchResults.tsx
+@@ -63,7 +63,7 @@ export default function BookmarkSearchResults({
+               </Text>
+               {history.length > 0 && (
+                 <Pressable onPress={clearHistory}>
+-                  <Text className="text-sm text-blue-500">Clear</Text>
++                  <Text className="text-sm text-blue-500">Effacer</Text>
+                 </Pressable>
+               )}
+             </View>
+diff --git a/apps/mobile/components/search/InlineSearch.tsx b/apps/mobile/components/search/InlineSearch.tsx
+index 422c6db..6b48c78 100644
+--- a/apps/mobile/components/search/InlineSearch.tsx
++++ b/apps/mobile/components/search/InlineSearch.tsx
+@@ -63,7 +63,7 @@ export default function InlineSearch({
+         {rightElement}
+         <Pressable
+           onPress={onClose}
+-          accessibilityLabel="Close"
++          accessibilityLabel="Fermer"
+           accessibilityRole="button"
+           className="p-1"
+         >
+diff --git a/apps/mobile/components/search/SearchModeSelector.tsx b/apps/mobile/components/search/SearchModeSelector.tsx
+index 4ff28b5..efd6c2c 100644
+--- a/apps/mobile/components/search/SearchModeSelector.tsx
++++ b/apps/mobile/components/search/SearchModeSelector.tsx
+@@ -18,31 +18,31 @@ import type { ZBookmarkSearchMode } from "@karakeep/shared/types/bookmarks";
+ const SEARCH_MODES = [
+   {
+     value: "fts",
+-    label: "Keyword",
+-    description: "Match exact words across your bookmarks.",
++    label: "Mot-clé",
++    description: "Recherche les mots exacts dans vos marque-pages.",
+     image: "text.magnifyingglass",
+     Icon: TextSearch,
+   },
+   {
+     value: "hybrid",
+-    label: "Hybrid",
+-    description: "Balance exact matches and related ideas.",
++    label: "Hybride",
++    description: "Équilibre entre correspondances exactes et idées proches.",
+     image: "arrow.up.arrow.down",
+     Icon: Blend,
+   },
+   {
+     value: "semantic",
+-    label: "Semantic",
+-    description: "Find related ideas when the words differ.",
++    label: "Sémantique",
++    description: "Trouve des idées proches même quand les mots diffèrent.",
+     image: "brain",
+     Icon: BrainCircuit,
+   },
+ ] as const;
+ 
+ export const SEARCH_MODE_PLACEHOLDERS: Record<ZBookmarkSearchMode, string> = {
+-  fts: "Search bookmarks...",
+-  hybrid: "Search by words or meaning...",
+-  semantic: "Describe what you remember...",
++  fts: "Rechercher des marque-pages...",
++  hybrid: "Rechercher par mots ou par sens...",
++  semantic: "Décrivez ce dont vous vous souvenez...",
+ };
+ 
+ export function SearchModeSelector({
+@@ -80,7 +80,7 @@ export function SearchModeSelector({
+   return (
+     <View className={cn("flex-row justify-end py-1", className)}>
+       <MenuView
+-        title="Search mode"
++        title="Mode de recherche"
+         actions={actions}
+         shouldOpenOnLongPress={false}
+         onPressAction={({ nativeEvent }) => {
+@@ -97,8 +97,8 @@ export function SearchModeSelector({
+         }}
+       >
+         <Pressable
+-          accessibilityLabel={`Search mode: ${activeMode.label}`}
+-          accessibilityHint="Opens the search mode menu"
++          accessibilityLabel={`Mode de recherche : ${activeMode.label}`}
++          accessibilityHint="Ouvre le menu du mode de recherche"
+           accessibilityRole="button"
+           className={cn(
+             "min-h-11 flex-row items-center gap-1.5 rounded-full border px-3",
+diff --git a/apps/mobile/components/settings/ProfileAvatarButton.tsx b/apps/mobile/components/settings/ProfileAvatarButton.tsx
+index 14e3f48..81a3a48 100644
+--- a/apps/mobile/components/settings/ProfileAvatarButton.tsx
++++ b/apps/mobile/components/settings/ProfileAvatarButton.tsx
+@@ -21,7 +21,7 @@ export function ProfileAvatarButton() {
+         router.push("/dashboard/settings");
+       }}
+       hitSlop={(HIT_TARGET - AVATAR_SIZE) / 2}
+-      accessibilityLabel="Open profile settings"
++      accessibilityLabel="Ouvrir les réglages du profil"
+       accessibilityRole="button"
+       className="relative"
+     >
+diff --git a/apps/mobile/components/settings/UsageStatsScreen.tsx b/apps/mobile/components/settings/UsageStatsScreen.tsx
+index 06ffa02..1ba45c4 100644
+--- a/apps/mobile/components/settings/UsageStatsScreen.tsx
++++ b/apps/mobile/components/settings/UsageStatsScreen.tsx
+@@ -49,7 +49,7 @@ const storageFormatter = new Intl.NumberFormat(undefined, {
+ });
+ 
+ const countFormatter = new Intl.NumberFormat();
+-const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
++const dayNames = ["dim", "lun", "mar", "mer", "jeu", "ven", "sam"];
+ 
+ const SOURCE_DETAILS: Record<
+   ZBookmarkSource,
+@@ -58,10 +58,10 @@ const SOURCE_DETAILS: Record<
+   api: { label: "API", icon: Zap },
+   web: { label: "Web", icon: Globe2 },
+   cli: { label: "CLI", icon: Code2 },
+-  mobile: { label: "Mobile app", icon: Smartphone },
+-  extension: { label: "Browser extension", icon: Chrome },
++  mobile: { label: "Appli mobile", icon: Smartphone },
++  extension: { label: "Extension de navigateur", icon: Chrome },
+   singlefile: { label: "SingleFile", icon: FileText },
+-  rss: { label: "RSS feed", icon: Rss },
++  rss: { label: "Flux RSS", icon: Rss },
+   import: { label: "Import", icon: Upload },
+ };
+ 
+@@ -295,9 +295,9 @@ function ActivityCharts({ stats }: { stats: UserStats }) {
+     <View className="gap-6">
+       <View className="flex-row">
+         {[
+-          ["This week", stats.bookmarkingActivity.thisWeek],
+-          ["This month", stats.bookmarkingActivity.thisMonth],
+-          ["This year", stats.bookmarkingActivity.thisYear],
++          ["Cette semaine", stats.bookmarkingActivity.thisWeek],
++          ["Ce mois-ci", stats.bookmarkingActivity.thisMonth],
++          ["Cette année", stats.bookmarkingActivity.thisYear],
+         ].map(([label, value], index) => (
+           <View
+             key={String(label)}
+@@ -317,10 +317,10 @@ function ActivityCharts({ stats }: { stats: UserStats }) {
+       </View>
+ 
+       <View className="gap-3">
+-        <Text className="text-sm font-medium">Days you save</Text>
++        <Text className="text-sm font-medium">Jours d’enregistrement</Text>
+         <View
+           accessible
+-          accessibilityLabel={`Bookmarks by weekday. ${dayNames.map((day, index) => `${day} ${activityByDay[index]}`).join(", ")}`}
++          accessibilityLabel={`Marque-pages par jour de la semaine. ${dayNames.map((day, index) => `${day} ${activityByDay[index]}`).join(", ")}`}
+           className="h-28 flex-row items-end gap-2"
+         >
+           {activityByDay.map((count, index) => (
+@@ -347,19 +347,19 @@ function ActivityCharts({ stats }: { stats: UserStats }) {
+ 
+       <View className="gap-3">
+         <View className="flex-row items-center justify-between gap-3">
+-          <Text className="text-sm font-medium">Time of day</Text>
++          <Text className="text-sm font-medium">Heure de la journée</Text>
+           <Text className="text-xs text-muted-foreground">
+             {maxHour > 0
+-              ? `Busiest around ${formatHour(busiestHour)}`
+-              : "No pattern yet"}
++              ? `Pic d’activité vers ${formatHour(busiestHour)}`
++              : "Pas encore de tendance"}
+           </Text>
+         </View>
+         <View
+           accessible
+           accessibilityLabel={
+             maxHour > 0
+-              ? `Bookmarks by hour. Busiest around ${formatHour(busiestHour)}.`
+-              : "No hourly saving pattern yet."
++              ? `Marque-pages par heure. Pic d’activité vers ${formatHour(busiestHour)}.`
++              : "Pas encore de tendance horaire d’enregistrement."
+           }
+           className="h-16 flex-row items-end gap-1"
+         >
+@@ -402,7 +402,7 @@ function SourcesList({ stats }: { stats: UserStats }) {
+       {stats.bookmarksBySource.map(({ source, count }) => {
+         const detail = source
+           ? SOURCE_DETAILS[source]
+-          : { label: "Unknown", icon: CircleHelp };
++          : { label: "Inconnu", icon: CircleHelp };
+         const Icon = detail.icon;
+ 
+         return (
+@@ -508,7 +508,7 @@ export default function UsageStatsScreen() {
+             >
+               {formatNumber(stats.numBookmarks)}
+             </Text>
+-            <Text className="mt-1 text-muted-foreground">Bookmarks saved</Text>
++            <Text className="mt-1 text-muted-foreground">Marque-pages enregistrés</Text>
+           </View>
+           <View
+             className="items-center justify-center bg-primary/10"
+@@ -538,16 +538,16 @@ export default function UsageStatsScreen() {
+         </View>
+       </View>
+ 
+-      <SectionLabel>At a glance</SectionLabel>
++      <SectionLabel>En un coup d’œil</SectionLabel>
+       <View className="flex-row flex-wrap gap-2">
+         <MetricTile
+-          label="Favourites"
++          label="Favoris"
+           value={formatNumber(stats.numFavorites)}
+           icon={Heart}
+           width={metricTileWidth}
+         />
+         <MetricTile
+-          label="Archived"
++          label="Archivés"
+           value={formatNumber(stats.numArchived)}
+           icon={Archive}
+           width={metricTileWidth}
+@@ -559,19 +559,19 @@ export default function UsageStatsScreen() {
+           width={metricTileWidth}
+         />
+         <MetricTile
+-          label="Lists"
++          label="Listes"
+           value={formatNumber(stats.numLists)}
+           icon={List}
+           width={metricTileWidth}
+         />
+         <MetricTile
+-          label="Highlights"
++          label="Surlignages"
+           value={formatNumber(stats.numHighlights)}
+           icon={Highlighter}
+           width={metricTileWidth}
+         />
+         <MetricTile
+-          label="Added this year"
++          label="Ajoutés cette année"
+           value={formatNumber(stats.bookmarkingActivity.thisYear)}
+           icon={Clock3}
+           width={metricTileWidth}
+@@ -585,30 +585,30 @@ export default function UsageStatsScreen() {
+         >
+           <EmptyState
+             icon={BookOpen}
+-            title="Your library is ready"
+-            subtitle="Your saving patterns will appear here once you add a few bookmarks."
++            title="Votre bibliothèque est prête"
++            subtitle="Vos habitudes d’enregistrement apparaîtront ici dès que vous aurez ajouté quelques marque-pages."
+           />
+         </View>
+       ) : (
+         <>
+-          <SectionLabel>Your library</SectionLabel>
+-          <SectionCard title="Bookmark types" icon={BookOpen}>
++          <SectionLabel>Votre bibliothèque</SectionLabel>
++          <SectionCard title="Types de marque-pages" icon={BookOpen}>
+             <ProgressRow
+-              label="Links"
++              label="Liens"
+               value={stats.bookmarksByType.link}
+               total={stats.numBookmarks}
+               icon={Link2}
+               color={colors.primary}
+             />
+             <ProgressRow
+-              label="Text notes"
++              label="Notes texte"
+               value={stats.bookmarksByType.text}
+               total={stats.numBookmarks}
+               icon={FileText}
+               color="#34C759"
+             />
+             <ProgressRow
+-              label="Files and images"
++              label="Fichiers et images"
+               value={stats.bookmarksByType.asset}
+               total={stats.numBookmarks}
+               icon={ImageIcon}
+@@ -616,36 +616,36 @@ export default function UsageStatsScreen() {
+             />
+           </SectionCard>
+ 
+-          <SectionCard title="Saving activity" icon={Clock3}>
++          <SectionCard title="Activité d’enregistrement" icon={Clock3}>
+             <ActivityCharts stats={stats} />
+           </SectionCard>
+ 
+-          <SectionCard title="Top domains" icon={Globe2}>
++          <SectionCard title="Principaux domaines" icon={Globe2}>
+             <RankedList
+               items={stats.topDomains.map(({ domain, count }) => ({
+                 label: domain,
+                 count,
+               }))}
+-              emptyText="Domains will appear after you save a link."
++              emptyText="Les domaines apparaîtront après l’enregistrement d’un lien."
+             />
+           </SectionCard>
+ 
+-          <SectionCard title="Most used tags" icon={Hash}>
++          <SectionCard title="Tags les plus utilisés" icon={Hash}>
+             <RankedList
+               items={stats.tagUsage.map(({ name, count }) => ({
+                 label: name,
+                 count,
+               }))}
+-              emptyText="Tags will appear as you organize your bookmarks."
++              emptyText="Les tags apparaîtront à mesure que vous organisez vos marque-pages."
+             />
+           </SectionCard>
+ 
+-          <SectionCard title="Saved with" icon={Upload}>
++          <SectionCard title="Enregistré avec" icon={Upload}>
+             <SourcesList stats={stats} />
+           </SectionCard>
+ 
+           {assetsBySize.length > 0 ? (
+-            <SectionCard title="Storage breakdown" icon={Database}>
++            <SectionCard title="Répartition du stockage" icon={Database}>
+               {assetsBySize.map((asset) => (
+                 <ProgressRow
+                   key={asset.type}
+diff --git a/apps/mobile/components/settings/settings-list.tsx b/apps/mobile/components/settings/settings-list.tsx
+index 5336843..83e0537 100644
+--- a/apps/mobile/components/settings/settings-list.tsx
++++ b/apps/mobile/components/settings/settings-list.tsx
+@@ -110,7 +110,7 @@ function SettingsNavigationRow({
+ }) {
+   return (
+     <Pressable
+-      accessibilityHint={`Opens ${label} settings`}
++      accessibilityHint={`Ouvre les réglages « ${label} »`}
+       accessibilityRole="button"
+       className="min-h-10 flex-row items-center px-4 py-1 active:bg-muted/10"
+       onPress={onPress}
+diff --git a/apps/mobile/components/ui/SearchInput/SearchInput.ios.tsx b/apps/mobile/components/ui/SearchInput/SearchInput.ios.tsx
+index d492e44..71cb0ca 100644
+--- a/apps/mobile/components/ui/SearchInput/SearchInput.ios.tsx
++++ b/apps/mobile/components/ui/SearchInput/SearchInput.ios.tsx
+@@ -33,8 +33,8 @@ const SearchInput = React.forwardRef<
+       value: valueProp,
+       onChangeText: onChangeTextProp,
+       onFocus: onFocusProp,
+-      placeholder = "Search...",
+-      cancelText = "Cancel",
++      placeholder = "Rechercher...",
++      cancelText = "Annuler",
+       containerClassName,
+       iconContainerClassName,
+       className,
+diff --git a/apps/mobile/components/ui/SearchInput/SearchInput.tsx b/apps/mobile/components/ui/SearchInput/SearchInput.tsx
+index e028a07..6d3d52f 100644
+--- a/apps/mobile/components/ui/SearchInput/SearchInput.tsx
++++ b/apps/mobile/components/ui/SearchInput/SearchInput.tsx
+@@ -18,7 +18,7 @@ const SearchInput = React.forwardRef<
+     {
+       value: valueProp,
+       onChangeText: onChangeTextProp,
+-      placeholder = "Search...",
++      placeholder = "Rechercher...",
+       containerClassName,
+       iconContainerClassName,
+       className,
+diff --git a/apps/mobile/components/ui/emoji-picker.tsx b/apps/mobile/components/ui/emoji-picker.tsx
+index f2f1414..356d7cb 100644
+--- a/apps/mobile/components/ui/emoji-picker.tsx
++++ b/apps/mobile/components/ui/emoji-picker.tsx
+@@ -23,14 +23,14 @@ import { Text } from "./Text";
+ const data = emojiData as EmojiMartData;
+ 
+ const CATEGORY_DETAILS: Record<string, { label: string; icon: string }> = {
+-  people: { label: "Smileys & people", icon: "😀" },
+-  nature: { label: "Animals & nature", icon: "🐻" },
+-  foods: { label: "Food & drink", icon: "🍎" },
+-  activity: { label: "Activities", icon: "⚽️" },
+-  places: { label: "Travel & places", icon: "🚗" },
+-  objects: { label: "Objects", icon: "💡" },
+-  symbols: { label: "Symbols", icon: "❤️" },
+-  flags: { label: "Flags", icon: "🏳️" },
++  people: { label: "Smileys et personnes", icon: "😀" },
++  nature: { label: "Animaux et nature", icon: "🐻" },
++  foods: { label: "Nourriture et boissons", icon: "🍎" },
++  activity: { label: "Activités", icon: "⚽️" },
++  places: { label: "Voyages et lieux", icon: "🚗" },
++  objects: { label: "Objets", icon: "💡" },
++  symbols: { label: "Symboles", icon: "❤️" },
++  flags: { label: "Drapeaux", icon: "🏳️" },
+ };
+ 
+ const COLUMN_COUNT = 8;
+@@ -86,7 +86,7 @@ const EmojiCell = memo(function EmojiCell({
+   return (
+     <Pressable
+       accessibilityRole="button"
+-      accessibilityLabel={`Choose ${emoji.name}`}
++      accessibilityLabel={`Choisir ${emoji.name}`}
+       accessibilityState={{ selected }}
+       className={
+         selected
+@@ -168,10 +168,10 @@ export function EmojiPicker({ value, onChange }: EmojiPickerProps) {
+   return (
+     <>
+       <View className="gap-1.5">
+-        <Text className="text-sm text-muted-foreground">Icon</Text>
++        <Text className="text-sm text-muted-foreground">Icône</Text>
+         <Pressable
+           accessibilityRole="button"
+-          accessibilityLabel={`List icon: ${value}. Open emoji picker`}
++          accessibilityLabel={`Icône de la liste : ${value}. Ouvrir le sélecteur d’émojis`}
+           className="h-14 flex-row items-center rounded-xl border border-input bg-card px-3 active:opacity-70"
+           style={{ borderCurve: "continuous" }}
+           onPress={() => setVisible(true)}
+@@ -180,7 +180,7 @@ export function EmojiPicker({ value, onChange }: EmojiPickerProps) {
+             <Text className="text-2xl leading-8">{value}</Text>
+           </View>
+           <View className="flex-1 px-3">
+-            <Text className="font-medium">List icon</Text>
++            <Text className="font-medium">Icône de la liste</Text>
+             <Text className="text-xs text-muted-foreground">
+               Search the full emoji library
+             </Text>
+@@ -200,7 +200,7 @@ export function EmojiPicker({ value, onChange }: EmojiPickerProps) {
+           behavior={process.env.EXPO_OS === "ios" ? "padding" : undefined}
+         >
+           <Pressable
+-            accessibilityLabel="Close emoji picker"
++            accessibilityLabel="Fermer le sélecteur d’émojis"
+             className="absolute inset-0 bg-black/40"
+             onPress={closePicker}
+           />
+@@ -215,10 +215,10 @@ export function EmojiPicker({ value, onChange }: EmojiPickerProps) {
+           >
+             <View className="h-1 w-10 self-center rounded-full bg-muted" />
+             <View className="flex-row items-center justify-between px-5 py-4">
+-              <Text className="text-xl font-semibold">Choose an icon</Text>
++              <Text className="text-xl font-semibold">Choisir une icône</Text>
+               <Pressable
+                 accessibilityRole="button"
+-                accessibilityLabel="Close"
++                accessibilityLabel="Fermer"
+                 className="h-9 w-9 items-center justify-center rounded-full bg-background active:opacity-70"
+                 onPress={closePicker}
+               >
+@@ -237,7 +237,7 @@ export function EmojiPicker({ value, onChange }: EmojiPickerProps) {
+                 <Input
+                   value={searchQuery}
+                   onChangeText={setSearchQuery}
+-                  placeholder="Search emoji"
++                  placeholder="Rechercher un émoji"
+                   autoCapitalize="none"
+                   autoCorrect={false}
+                   returnKeyType="done"
+@@ -246,7 +246,7 @@ export function EmojiPicker({ value, onChange }: EmojiPickerProps) {
+                 {searchQuery.length > 0 && (
+                   <Pressable
+                     accessibilityRole="button"
+-                    accessibilityLabel="Clear search"
++                    accessibilityLabel="Effacer la recherche"
+                     className="absolute right-2 h-8 w-8 items-center justify-center rounded-full"
+                     onPress={() => setSearchQuery("")}
+                   >
+@@ -308,7 +308,7 @@ export function EmojiPicker({ value, onChange }: EmojiPickerProps) {
+               contentContainerStyle={{ paddingHorizontal: 12, paddingTop: 4 }}
+               ListEmptyComponent={
+                 <View className="items-center gap-1 py-16">
+-                  <Text className="text-lg font-medium">No emoji found</Text>
++                  <Text className="text-lg font-medium">Aucun émoji trouvé</Text>
+                   <Text className="text-sm text-muted-foreground">
+                     Try a different search
+                   </Text>
+diff --git a/apps/mobile/lib/downloadAttachment.ts b/apps/mobile/lib/downloadAttachment.ts
+index 244954b..92e21a8 100644
+--- a/apps/mobile/lib/downloadAttachment.ts
++++ b/apps/mobile/lib/downloadAttachment.ts
+@@ -67,7 +67,7 @@ export async function downloadAttachment(
+     const uri = `${directory}${encodeURIComponent(fileName)}`;
+     await FileSystem.moveAsync({ from: result.uri, to: uri });
+     await Sharing.shareAsync(uri, {
+-      dialogTitle: "Save or share attachment",
++      dialogTitle: "Enregistrer ou partager la pièce jointe",
+       ...(mimeType ? { mimeType } : {}),
+     });
+   } finally {
+diff --git a/apps/mobile/lib/offlineLibrary.ts b/apps/mobile/lib/offlineLibrary.ts
+index 59e2e95..1132403 100644
+--- a/apps/mobile/lib/offlineLibrary.ts
++++ b/apps/mobile/lib/offlineLibrary.ts
+@@ -224,7 +224,7 @@ function getDisplayTitle(bookmark: OfflineArticle["bookmark"]) {
+     }
+   }
+ 
+-  return "Untitled bookmark";
++  return "Marque-page sans titre";
+ }
+ 
+ export function getOfflineLibraryScope(
+diff --git a/apps/mobile/lib/settings-display.ts b/apps/mobile/lib/settings-display.ts
+index 1ccbe96..7d12f42 100644
+--- a/apps/mobile/lib/settings-display.ts
++++ b/apps/mobile/lib/settings-display.ts
+@@ -1,30 +1,30 @@
+ import type { Settings } from "@/lib/settings";
+ 
+ const THEME_LABELS: Record<Settings["theme"], string> = {
+-  dark: "Dark",
+-  light: "Light",
+-  system: "System",
++  dark: "Sombre",
++  light: "Clair",
++  system: "Système",
+ };
+ 
+ const BOOKMARK_VIEW_LABELS: Record<Settings["defaultBookmarkView"], string> = {
+-  browser: "Browser",
+-  externalBrowser: "External Browser",
+-  reader: "Reader",
++  browser: "Navigateur",
++  externalBrowser: "Navigateur externe",
++  reader: "Lecteur",
+ };
+ 
+ const UPLOAD_QUALITY_OPTIONS = [
+   {
+-    description: "Smaller files and faster uploads",
+-    label: "Data Saver",
++    description: "Fichiers plus légers et envois plus rapides",
++    label: "Économie de données",
+     value: 0.2,
+   },
+   {
+-    description: "A balance of detail and file size",
++    description: "Un équilibre entre détail et taille de fichier",
+     label: "Standard",
+     value: 0.6,
+   },
+   {
+-    description: "Keep the most image detail",
++    description: "Conserver le maximum de détails des images",
+     label: "Original",
+     value: 1,
+   },
+diff --git a/apps/mobile/lib/shareBookmark.ts b/apps/mobile/lib/shareBookmark.ts
+index 28b3029..284683c 100644
+--- a/apps/mobile/lib/shareBookmark.ts
++++ b/apps/mobile/lib/shareBookmark.ts
+@@ -28,7 +28,7 @@ export async function shareBookmark(
+       case BookmarkTypes.TEXT:
+         await Clipboard.setStringAsync(bookmark.content.text);
+         toast({
+-          message: "Text copied to clipboard",
++          message: "Texte copié dans le presse-papiers",
+           showProgress: false,
+         });
+         break;
+@@ -42,7 +42,7 @@ export async function shareBookmark(
+ 
+         if (!isShareable) {
+           toast({
+-            message: "Sharing is not available for this file type",
++            message: "Le partage n’est pas disponible pour ce type de fichier",
+             variant: "destructive",
+             showProgress: false,
+           });
+@@ -82,7 +82,7 @@ export async function shareBookmark(
+   } catch (error) {
+     console.error("Share error:", error);
+     toast({
+-      message: "Failed to share",
++      message: "Échec du partage",
+       variant: "destructive",
+       showProgress: false,
+     });
+diff --git a/apps/mobile/lib/upload.ts b/apps/mobile/lib/upload.ts
+index b187d93..9cde7d7 100644
+--- a/apps/mobile/lib/upload.ts
++++ b/apps/mobile/lib/upload.ts
+@@ -22,7 +22,7 @@ function getUploadErrorMessage(status: number, body: string): string {
+   } catch {
+     // Not JSON
+   }
+-  return `Upload failed (HTTP ${status})`;
++  return `Échec de l’envoi (HTTP ${status})`;
+ }
+ 
+ export function useUploadAsset(
